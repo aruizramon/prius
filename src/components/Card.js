@@ -10,10 +10,10 @@ const cardSource = {
   }
 };
 
-@DragSource(ItemTypes.CARD, cardSource, (connect, monitor) => ({
-  connectDragSource: connect.dragSource(),
-  isDragging: monitor.isDragging()
-}))
+// @DragSource(ItemTypes.CARD, cardSource, (connect, monitor) => ({
+//   connectDragSource: connect.dragSource(),
+//   isDragging: monitor.isDragging()
+// }))
 export default class Card extends Component {
   render() {
     const { title, description, connectDragSource, isDragging } = this.props
