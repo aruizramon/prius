@@ -1,34 +1,37 @@
 import React, { Component, PropTypes } from 'react'
 import { Panel } from 'react-bootstrap'
-import ItemTypes from '../ItemTypes'
-import { DragSource } from 'react-dnd'
+import ItemTypes from '../constants/ItemTypes'
+import { DragSource, DropTarget } from 'react-dnd'
 
 const cardSource = {
   beginDrag(props) {
-    title: props.title
-    description: props.description
+    return { title: props.title, description: props.description };
   }
 };
 
-// @DragSource(ItemTypes.CARD, cardSource, (connect, monitor) => ({
-//   connectDragSource: connect.dragSource(),
-//   isDragging: monitor.isDragging()
-// }))
+@DragSource(ItemTypes.CARD, cardSource, (connect, monitor) => ({
+  connectDragSource: connect.dragSource(),
+  isDragging: monitor.isDragging()
+}))
 export default class Card extends Component {
+  static propTypes = {
+    title: PropTypes.string.isRequired,
+    description: PropTypes.string,
+    connectDragSource: PropTypes.func.isRequired,
+    isDragging: PropTypes.bool.isRequired
+  };
+
   render() {
-    const { title, description, connectDragSource, isDragging } = this.props
+
+    const { title, description } = this.props
+    const { connectDragSource, isDragging } = this.props
 
     return connectDragSource(
-      <Panel bsStyle="primary" header={title}>
-        {description}
-      </Panel>
+      <div className="kanban-card">
+        <Panel bsStyle="primary" header={title}>
+          {description}
+        </Panel>
+      </div>
     );
   }
-}
-
-Card.propTypes = {
-  title: PropTypes.string.isRequired,
-  description: PropTypes.string,
-  connectDragSource: PropTypes.func.isRequired,
-  isDragging: PropTypes.bool.isRequired
 }
