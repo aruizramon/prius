@@ -1,26 +1,60 @@
-import * as ActionTypes from '../actions'
-import _ from 'lodash/fp'
-import { combineReducers } from 'redux'
+import * as ActionTypes from '../actions';
+import _ from 'lodash/fp';
+import { combineReducers } from 'redux';
 
-function ui(state = null, action) {
-  const { type, error } = action
-
-  return state
-}
-
-function kanban(state = [], action) {
+const card = (state, action) => {
   switch (action.type) {
     case ActionTypes.ADD_CARD:
-      
+      return {
+        id: action.id,
+        title: action.title,
+        description: action.description,
+      };
     default:
-      return state
+      return state;
   }
-}
+};
+
+const cards = (state = [], action) => {
+  switch (action.type) {
+    case ActionTypes.ADD_CARD:
+      return [
+        ...state,
+        card(undefined, action),
+      ];
+    default:
+      return state;
+  }
+};
+
+const list = (state, action) => {
+  switch (action.type) {
+    case ActionTypes.ADD_LIST:
+      return {
+        id: action.id,
+        title: action.title,
+      };
+    default:
+      return state;
+  }
+};
+
+const lists = (state = [], action) => {
+  switch (action.type) {
+    case ActionTypes.ADD_LIST:
+      return [
+        ...state,
+        list(undefined, action),
+      ];
+    default:
+      return state;
+  }
+};
 
 
 const rootReducer = combineReducers({
-  ui,
-  kanban
-})
+  lists,
+  cards,
+});
 
-export default rootReducer
+export default rootReducer;
