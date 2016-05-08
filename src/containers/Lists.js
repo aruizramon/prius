@@ -6,19 +6,18 @@ import List from '../components/List';
 const mapStateToProps = (state) => {
   return {
     lists: state.lists,
-    cards: state.cards,
   };
 };
 
 @connect(mapStateToProps)
 export default class Lists extends Component {
   render() {
-    const { lists, cards } = this.props;
+    const { lists } = this.props;
     return (
       <Row>
         {lists.map((list) =>
           <Col sm={6} md={3}>
-            <List {...list} cards={cards} />
+            <List {...list} />
           </Col>
         )}
       </Row>

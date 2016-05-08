@@ -9,6 +9,7 @@ const card = (state, action) => {
         id: action.id,
         title: action.title,
         description: action.description,
+        parentList: action.parentList,
       };
     default:
       return state;

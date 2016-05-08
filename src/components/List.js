@@ -1,15 +1,25 @@
 import React, { Component, PropTypes } from 'react';
 import { Panel } from 'react-bootstrap';
+import { connect } from 'react-redux';
 import Card from '../components/Card';
 import ItemTypes from '../constants/ItemTypes';
 import { DropTarget } from 'react-dnd';
 
 const listTarget = {
   drop(props, monitor, component) {
-    alert('dropped');
+    const card = monitor.getItem();
+    console.log(card);
+    console.log(component);
   },
 };
 
+const mapStateToProps = (state, props) => {
+  return {
+    cards: state.cards.filter((card) => card.parentList === props.id),
+  };
+};
+
+@connect(mapStateToProps)
 @DropTarget(ItemTypes.CARD, listTarget, (connect) => ({
   connectDropTarget: connect.dropTarget(),
 }))
