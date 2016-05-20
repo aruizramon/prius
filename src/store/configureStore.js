@@ -9,7 +9,7 @@ export default function configureStore(initialState) {
     initialState,
     compose(
       applyMiddleware(createLogger()),
-      DevTools.instrument()
+      // DevTools.instrument()
     )
   );
 
