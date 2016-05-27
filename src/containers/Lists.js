@@ -23,12 +23,12 @@ export default class Lists extends Component {
       display:'inline-block',
       whiteSpace: 'normal',
       verticalAlign: 'top',
-      // width: '300px',
+      //width: '300px',
     };
     return (
       <Row style={rowStyles}>
         {lists.map((list) =>
-          <Col style={columnStyles} sm={6} md={3}>
+          <Col style={columnStyles} sm={6} md={2}>
             <List {...list} />
           </Col>
         )}

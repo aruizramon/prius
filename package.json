@@ -61,9 +61,11 @@
   "dependencies": {
     "react": "^0.14.8",
     "react-bootstrap": "^0.28.5",
+    "react-bootstrap-select": "^0.14.0",
     "react-dnd": "^2.1.4",
     "react-dnd-html5-backend": "^2.1.2",
     "react-dom": "^0.14.8",
+    "react-dropdown-input": "^0.1.11",
     "react-redux": "^4.4.2",
     "redux": "^3.4.0",
     "redux-thunk": "^2.0.1"

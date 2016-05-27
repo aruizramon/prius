@@ -13,7 +13,7 @@ export default class Board extends Component {
       <Grid fluid>
         <BoardHeader title="PriusJS" subtitle="by Spencer Schoeben" />
         <Lists />
-        <ContentCreator />
+
       </Grid>
     );
   }

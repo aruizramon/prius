@@ -1,5 +1,5 @@
 import React, { Component, PropTypes } from 'react';
-import { Panel } from 'react-bootstrap';
+import { Panel, ListGroup } from 'react-bootstrap';
 import { connect } from 'react-redux';
 import Card from '../components/Card';
 import ItemTypes from '../constants/ItemTypes';
@@ -27,18 +27,32 @@ export default class List extends Component {
   static propTypes = {
     title: PropTypes.string.isRequired,
     connectDropTarget: PropTypes.func.isRequired,
+    length: PropTypes.string,
+    description: PropTypes.object,
   }
 
   render() {
-    const { title, cards } = this.props;
+    const { title, length, description, cards } = this.props;
     const { connectDropTarget } = this.props;
 
     return connectDropTarget(
       <div className="kanban-list">
-        <Panel header={title}>
-          {cards.map((card) =>
-            <Card {...card} />
-          )}
+        <Panel header={
+          <div>
+            <h4>
+              {title}
+              <small>
+                <br />{description.label} - {description.value}
+                <br />{length}
+              </small>
+            </h4>
+          </div>
+          }>
+          <ListGroup>
+            {cards.map((card) =>
+              <Card {...card} />
+            )}
+          </ListGroup>
         </Panel>
       </div>
     );
