@@ -1,14 +1,29 @@
 import React, { Component } from 'react';
-import { Row, Col, PageHeader } from 'react-bootstrap';
-var Select = require('react-select');
+import { Row, Col, PageHeader, Select } from 'react-bootstrap';
+var SimpleSelect = require('react-selectize').SimpleSelect;
+
+const DropdownFilter = React.createClass({
+  render: function(){
+    var self = this,
+      options = ["apple", "mango", "grapes", "melon", "strawberry"].map(function(fruit){
+        return {label: fruit, value: fruit}
+      });
+      return <SimpleSelect
+                options={options}
+                placeholder="Select a fruit"
+                onValueChange = {function(values){
+                  console.log(values);
+                }}
+              ></SimpleSelect>
+  }
+});
+
+export default DropdownFilter;
+
+
 
 export default class Board extends Component {
   render() {
-    const options = [
-        { value: 'one', label: 'One' },
-        { value: 'two', label: 'Two' }
-    ];
-
     function logChange(val) {
         console.log("Selected: " + val);
     }
@@ -17,15 +32,10 @@ export default class Board extends Component {
         <Col sm={6} md={12}>
           <PageHeader>
             PriusJS <small>an open source Kanban board library</small>
-            <form>
-              <Select
-                name="form-field-name"
-                value="one"
-                options={options}
-                onChange={logChange}
-                />
-            </form>
           </PageHeader>
+          <Row>
+            <DropdownFilter />
+          </Row>
         </Col>
       </Row>
     );
