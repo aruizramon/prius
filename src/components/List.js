@@ -14,8 +14,12 @@ const listTarget = {
 };
 
 const mapStateToProps = (state, props) => {
+  var cards = state.cards.filter((card) =>
+      card.parentList === props.id &&
+      card.doc.source === "List"
+    )
   return {
-    cards: state.cards.filter((card) => card.parentList === props.id),
+    cards: cards
   };
 };
 
@@ -23,6 +27,7 @@ const mapStateToProps = (state, props) => {
 @DropTarget(ItemTypes.CARD, listTarget, (connect) => ({
   connectDropTarget: connect.dropTarget(),
 }))
+
 export default class List extends Component {
   static propTypes = {
     title: PropTypes.string.isRequired,
@@ -32,7 +37,7 @@ export default class List extends Component {
   }
 
   render() {
-    const { title, length, description, cards } = this.props;
+    const { title, description, cards } = this.props;
     const { connectDropTarget } = this.props;
 
     return connectDropTarget(
@@ -43,7 +48,7 @@ export default class List extends Component {
               {title}
               <small>
                 <br />{description.label} - {description.value}
-                <br />{length}
+                <br />{cards.length} entries in list
               </small>
             </h4>
           </div>
