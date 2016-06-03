@@ -5,6 +5,7 @@ import Card from '../components/Card';
 import ItemTypes from '../constants/ItemTypes';
 import { DropTarget } from 'react-dnd';
 
+
 const listTarget = {
   drop(props, monitor, component) {
     const card = monitor.getItem();
@@ -15,25 +16,23 @@ const listTarget = {
 
 const mapStateToProps = (state, props) => {
   var cards = state.cards.filter((card) =>
-      card.parentList === props.id &&
-      card.doc.source === "List"
+      card.parentList === props.id
     )
   return {
     cards: cards
   };
 };
 
+
 @connect(mapStateToProps)
 @DropTarget(ItemTypes.CARD, listTarget, (connect) => ({
   connectDropTarget: connect.dropTarget(),
 }))
-
 export default class List extends Component {
   static propTypes = {
     title: PropTypes.string.isRequired,
     connectDropTarget: PropTypes.func.isRequired,
-    length: PropTypes.string,
-    description: PropTypes.object,
+    description: PropTypes.object
   }
 
   render() {

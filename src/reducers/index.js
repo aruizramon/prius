@@ -2,6 +2,13 @@ import * as ActionTypes from '../actions';
 import _ from 'lodash/fp';
 import { combineReducers } from 'redux';
 
+const filters = (state = [], action) => {
+  switch (action.type) {
+    default:
+      return state;
+  }
+};
+
 const card = (state, action) => {
   switch (action.type) {
     case ActionTypes.ADD_CARD:
@@ -56,6 +63,7 @@ const lists = (state = [], action) => {
 const rootReducer = combineReducers({
   lists,
   cards,
+  filters,
 });
 
 export default rootReducer;
