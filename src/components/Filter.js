@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
 var SimpleSelect = require('react-selectize').SimpleSelect;
 var MultiSelect = require('react-selectize').MultiSelect;
@@ -13,20 +13,19 @@ const mapDispatchToProps = (dispatch) => {
 
 @connect(null, mapDispatchToProps)
 export default class Filter extends Component {
-  constructor(props) {
-    super(props);
-    this.get_options = this.get_options.bind(this);
-  }
-  get_options(id) {
-    return false;
+  static propTypes = {
+    options: PropTypes.array,
   }
   render() {
     var self = this;
-    const { title, id, type, options } = this.props
-//    var options = this.get_options(field);
+    const { title, id, type, options } = this.props;
+    var mappedOptions = options.map(function(value) {
+      return { label: value, value: value }
+    });
+    console.log(mappedOptions)
     if (type == "SimpleSelect") {
       return <SimpleSelect
-                options={options}
+                options={mappedOptions}
                 placeholder={title}
                 onValueChange = {function(value){
                   self.setState(value);
@@ -35,7 +34,7 @@ export default class Filter extends Component {
               />
     } else if (type == "MultiSelect") {
       return <MultiSelect
-                options={options}
+                options={mappedOptions}
                 placeholder={title}
                 onValuesChange = {function(values){
                   self.setState(values);

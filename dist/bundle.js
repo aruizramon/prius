@@ -50672,7 +50672,7 @@
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-	var _dec, _class;
+	var _dec, _class, _class2, _temp;
 
 	var _react = __webpack_require__(2);
 
@@ -50700,24 +50700,16 @@
 	  return (0, _redux.bindActionCreators)({ setFilter: _actions.setFilter }, dispatch);
 	};
 
-	var Filter = (_dec = (0, _reactRedux.connect)(null, mapDispatchToProps), _dec(_class = function (_Component) {
+	var Filter = (_dec = (0, _reactRedux.connect)(null, mapDispatchToProps), _dec(_class = (_temp = _class2 = function (_Component) {
 	  _inherits(Filter, _Component);
 
-	  function Filter(props) {
+	  function Filter() {
 	    _classCallCheck(this, Filter);
 
-	    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Filter).call(this, props));
-
-	    _this.get_options = _this.get_options.bind(_this);
-	    return _this;
+	    return _possibleConstructorReturn(this, Object.getPrototypeOf(Filter).apply(this, arguments));
 	  }
 
 	  _createClass(Filter, [{
-	    key: 'get_options',
-	    value: function get_options(id) {
-	      return false;
-	    }
-	  }, {
 	    key: 'render',
 	    value: function render() {
 	      var self = this;
@@ -50726,11 +50718,14 @@
 	      var id = _props.id;
 	      var type = _props.type;
 	      var options = _props.options;
-	      //    var options = this.get_options(field);
 
+	      var mappedOptions = options.map(function (value) {
+	        return { label: value, value: value };
+	      });
+	      console.log(mappedOptions);
 	      if (type == "SimpleSelect") {
 	        return _react2.default.createElement(SimpleSelect, {
-	          options: options,
+	          options: mappedOptions,
 	          placeholder: title,
 	          onValueChange: function onValueChange(value) {
 	            self.setState(value);
@@ -50739,7 +50734,7 @@
 	        });
 	      } else if (type == "MultiSelect") {
 	        return _react2.default.createElement(MultiSelect, {
-	          options: options,
+	          options: mappedOptions,
 	          placeholder: title,
 	          onValuesChange: function onValuesChange(values) {
 	            self.setState(values);
@@ -50751,7 +50746,9 @@
 	  }]);
 
 	  return Filter;
-	}(_react.Component)) || _class);
+	}(_react.Component), _class2.propTypes = {
+	  options: _react.PropTypes.array
+	}, _temp)) || _class);
 	exports.default = Filter;
 
 /***/ },
