@@ -4,7 +4,7 @@ import { connect } from 'react-redux';
 import Card from '../components/Card';
 import ItemTypes from '../constants/ItemTypes';
 import { DropTarget } from 'react-dnd';
-
+var numeral = require('numeral');
 
 const listTarget = {
   drop(props, monitor, component) {
@@ -57,10 +57,33 @@ export default class List extends Component {
     connectDropTarget: PropTypes.func.isRequired,
     description: PropTypes.object
   }
+  formatNumber(fieldtype, number) {
+    if (fieldtype == 'Currency'){
+      number = numeral(number).format('$0,0')
+    } else if (fieldtype == 'Int'){
+      number = numeral(number).format('0,0')
+    } else if (fieldtype == 'Float'){
+      number = numeral(number).format('0,0.00')
+    }
+    return number
+  }
+  getSum(field, cards) {
+    var sum = 0;
+    for (var i = 0; i < cards.length; i++) {
+      sum = sum + cards[i].doc[field.fieldname];
+    }
 
+    return { sum: this.formatNumber(field.fieldtype, sum) }
+  }
+  constructor(props){
+    super(props);
+    this.getSum = this.getSum.bind(this);
+    this.formatNumber = this.formatNumber.bind(this);
+  }
   render() {
     const { title, description, cards } = this.props;
     const { connectDropTarget } = this.props;
+    var { sum } = this.getSum(description, cards);
 
     return connectDropTarget(
       <div className="kanban-list">
@@ -69,7 +92,7 @@ export default class List extends Component {
             <h4>
               {title}
               <small>
-                <br />{description.label} - {description.value}
+                <br />{description.label} - {sum}
                 <br />{cards.length} in list
               </small>
             </h4>
