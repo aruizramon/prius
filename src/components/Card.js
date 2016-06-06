@@ -3,6 +3,7 @@ import { Panel, Popover, Tooltip, Modal, OverlayTrigger, Button } from 'react-bo
 import ItemTypes from '../constants/ItemTypes';
 import { DragSource } from 'react-dnd';
 
+
 const cardSource = {
   beginDrag(props) {
     const { id, parentList } = props;
@@ -10,11 +11,13 @@ const cardSource = {
   },
 };
 
+
 @DragSource(ItemTypes.CARD, cardSource, (connect, monitor) => ({
   showModal: false,
   connectDragSource: connect.dragSource(),
   isDragging: monitor.isDragging(),
 }))
+
 
 class Card extends Component {
   static propTypes = {
@@ -43,13 +46,13 @@ class Card extends Component {
   }
   constructor(props) {
     super(props);
-    this.state = {
-      showModal: false
-    };
     this.open = this.open.bind(this);
     this.close = this.close.bind(this);
     this.closeApp = this.closeApp.bind(this);
     this.get_form = this.get_form.bind(this);
+    this.state = {
+      showModal: false,
+    }
   }
 
   render() {
@@ -58,33 +61,35 @@ class Card extends Component {
     const { showModal } = this.state;
 
     return connectDragSource(
-        <div className="kanban-card">
-          <Panel bsStyle="primary" header={title} onClick={this.open}>
-              <small>
-                {descr_1.label}: {descr_1.value}
-                <br />{descr_2.label}: {descr_2.value}
-              </small>
-          </Panel>
+      <div className="kanban-card">
+        <Panel bsStyle="primary"
+               header={title}
+               onClick={this.open}>
+            <small>
+              {descr_1.label}: {descr_1.value}
+              <br />{descr_2.label}: {descr_2.value}
+            </small>
+        </Panel>
 
-          <Modal show={this.state.showModal} onHide={this.close}>
-            <Modal.Header>
-              <Modal.Title>
-                <a href={url} onClick={this.closeApp}>
-                  <h3>{doc.doctype} - {title} - {doc.name}</h3>
-                </a>
-              </Modal.Title>
-            </Modal.Header>
-            <Modal.Body>
-            <div id="form-popup"
-              dangerouslySetInnerHTML={this.get_form({form})}>
-            </div>
-            </Modal.Body>
-            <Modal.Footer>
-              <Button onClick={this.close}>Close</Button>
-            </Modal.Footer>
-          </Modal>
-        </div>
-      );
+        <Modal show={showModal} onHide={this.close}>
+          <Modal.Header>
+            <Modal.Title>
+              <a href={url} onClick={this.closeApp}>
+                <h3>{doc.doctype} - {title} - {doc.name}</h3>
+              </a>
+            </Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+          <div id="form-popup"
+            dangerouslySetInnerHTML={this.get_form({form})}>
+          </div>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button onClick={this.close}>Close</Button>
+          </Modal.Footer>
+        </Modal>
+      </div>
+    );
   }
 }
 

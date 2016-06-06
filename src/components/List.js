@@ -14,9 +14,32 @@ const listTarget = {
   },
 };
 
+const checkFilterMatch = (filterValues, docValue) => {
+  var match = false;
+  filterValues.forEach(function(value) {
+    if (value.value == docValue) {
+      match = true;
+    }
+  });
+  return match;
+}
+
+const isHidden = (doc, filters) => {
+  var hidden = false;
+  filters.forEach(function(filter) {
+    if (filter.values.length > 0) {
+      if (!checkFilterMatch(filter.values, doc[filter.id])){
+        hidden = true;
+      }
+    }
+  });
+  return hidden;
+}
+
 const mapStateToProps = (state, props) => {
   var cards = state.cards.filter((card) =>
-      card.parentList === props.id
+      card.parentList === props.id &&
+      isHidden(card.doc, state.filters) == false
     )
   return {
     cards: cards
@@ -47,7 +70,7 @@ export default class List extends Component {
               {title}
               <small>
                 <br />{description.label} - {description.value}
-                <br />{cards.length} entries in list
+                <br />{cards.length} in list
               </small>
             </h4>
           </div>
