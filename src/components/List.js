@@ -6,6 +6,7 @@ import ItemTypes from '../constants/ItemTypes';
 import { DropTarget } from 'react-dnd';
 var numeral = require('numeral');
 
+
 const listTarget = {
   drop(props, monitor, component) {
     const card = monitor.getItem();

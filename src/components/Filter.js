@@ -22,7 +22,6 @@ export default class Filter extends Component {
     var mappedOptions = options.map(function(value) {
       return { label: value, value: value }
     });
-    console.log(mappedOptions)
     if (type == "SimpleSelect") {
       return <SimpleSelect
                 options={mappedOptions}

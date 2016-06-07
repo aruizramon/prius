@@ -11,7 +11,8 @@ export default class Board extends Component {
   render() {
     return (
       <Grid fluid>
-        <BoardHeader title="PriusJS" subtitle="by Spencer Schoeben" />
+        <br />
+        <br />
         <Lists />
 
       </Grid>

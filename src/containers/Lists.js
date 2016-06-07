@@ -39,9 +39,10 @@ export default class Lists extends Component {
             </Col>
           )}
         </Row>
+        <br />
         <Row style={rowStyles}>
           {lists.map((list) =>
-            <Col style={columnStyles} sm={6} md={3}>
+            <Col style={columnStyles} sm={6} md={2}>
               <List {...list} />
             </Col>
           )}
