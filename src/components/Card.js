@@ -25,6 +25,7 @@ class Card extends Component {
     descr_1: PropTypes.object,
     descr_2: PropTypes.object,
     doc: PropTypes.object,
+    communications: PropTypes.object,
     connectDragSource: PropTypes.func.isRequired,
     isDragging: PropTypes.bool.isRequired,
     showModal: PropTypes.bool.isRequired,
@@ -134,7 +135,7 @@ class Card extends Component {
   }
 
   render() {
-    const { title, doc, url, descr_1, descr_2, form } = this.props;
+    const { title, doc, url, descr_1, descr_2, form, communications } = this.props;
     const { connectDragSource, isDragging } = this.props;
     const { showModal } = this.state;
 
@@ -157,9 +158,8 @@ class Card extends Component {
               </Modal.Title>
             </Modal.Header>
             <Modal.Body>
-            <div id="form-popup"
-              dangerouslySetInnerHTML={this.get_form({form})}>
-            </div>
+              <div>
+              </div>
             </Modal.Body>
             <Modal.Footer>
               <Button onClick={this.close}>Close</Button>
