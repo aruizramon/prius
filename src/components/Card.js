@@ -2,6 +2,7 @@ import React, { Component, PropTypes } from 'react';
 import { Panel, Popover, Tooltip, Modal, OverlayTrigger, Button, Grid, Row, Col } from 'react-bootstrap';
 import ItemTypes from '../constants/ItemTypes';
 import { DragSource } from 'react-dnd';
+var numeral = require('numeral');
 
 
 const cardSource = {
@@ -21,16 +22,13 @@ const cardSource = {
 
 class Card extends Component {
   static propTypes = {
-    title: PropTypes.string.isRequired,
-    descr_1: PropTypes.object,
-    descr_2: PropTypes.object,
     doc: PropTypes.object,
     communications: PropTypes.array,
+    display: PropTypes.object,
     connectDragSource: PropTypes.func.isRequired,
     isDragging: PropTypes.bool.isRequired,
     showModal: PropTypes.bool.isRequired,
     url: PropTypes.string,
-    form: PropTypes.any,
   };
   close() {
     this.setState({ showModal: false });
@@ -120,7 +118,8 @@ class Card extends Component {
     this.setState({ showModal: false});
     window.location.reload();
   }
-  get_form(form) {
+  // unused
+  getForm(form) {
     return { __html: form.form}
   }
   get_comms() {
@@ -136,13 +135,23 @@ class Card extends Component {
       }
       $(".modal-content").find(cardID).append(newComm);
     }
+  formatField(fieldtype, field) {
+    if (fieldtype == 'Currency'){
+      field = numeral(field).format('$0,0')
+    } else if (fieldtype == 'Int'){
+      field = numeral(field).format('0,0')
+    } else if (fieldtype == 'Float'){
+      field = numeral(field).format('0,0.00')
+    }
+    return field
   }
   constructor(props) {
     super(props);
     this.open = this.open.bind(this);
     this.close = this.close.bind(this);
     this.closeApp = this.closeApp.bind(this);
-    this.get_form = this.get_form.bind(this);
+    this.getForm = this.getForm.bind(this);
+    this.formatField = this.formatField.bind(this);
     this.state = {
       showModal: false,
     }
@@ -152,55 +161,57 @@ class Card extends Component {
 
   render() {
     const { title, doc, url, descr_1, descr_2, form, communications } = this.props;
+    const { doc, url, display, communications } = this.props;
     const { connectDragSource, isDragging } = this.props;
     const { showModal } = this.state;
 
     return connectDragSource(
       <div className="kanban-card">
         <Panel bsStyle="primary"
-               header={title}
+               header={display.titleField}
                onClick={this.open}>
             <small>
-              {descr_1.label}: {descr_1.value}
-              <br />{descr_2.label}: {descr_2.value}
+              {display.subOneLabel} - {this.formatField(display.subOneType, display.subOne)}
+              <br />
+              {display.subTwoLabel} - {this.formatField(display.subTwoType, display.subTwo)}
             </small>
         </Panel>
-          <Modal show={this.state.showModal} onEnter={this.get_comms} onHide={this.close}>
-            <Modal.Header>
-              <Modal.Title>
-                <h3>
-                <Row>
-                  <Col sm={10}>
-                      <a href={url} onClick={this.closeApp}>
-                        {doc.doctype} - {title} - {doc.name}
-                      </a>
-                  </Col>
-                  <Col sm={2}>
-                    <Button onClick={this.log_call}>Log Call</Button>
-                  </Col>
-                </Row>
-              </h3>
-              </Modal.Title>
-            </Modal.Header>
-            <Modal.Body id={url}>
-              <Modal.Title><strong>Lead Information</strong></Modal.Title>
-              <div id="info">
-                <p>
-                  <strong>Title : </strong>{title}<br />
-                  <strong>{descr_1.label} : </strong>{descr_1.value}<br />
-                </p>
-              </div>
-            </Modal.Body>
-            <hr></hr>
-            <Modal.Body id={url}>
-              <Modal.Title><strong>Communication History</strong></Modal.Title>
-              <div id="comms">
-              </div>
-            </Modal.Body>
-            <Modal.Footer>
-            </Modal.Footer>
-          </Modal>
-        </div>
+        <Modal show={this.state.showModal} onEnter={this.get_comms} onHide={this.close}>
+          <Modal.Header>
+            <Modal.Title>
+              <h3>
+              <Row>
+                <Col sm={10}>
+                    <a href={url} onClick={this.closeApp}>
+                      {doc.doctype} - {this.formatField(display.titleFieldType, display.titleField)} - {doc.name}
+                    </a>
+                </Col>
+                <Col sm={2}>
+                  <Button onClick={this.log_call}>Log Call</Button>
+                </Col>
+              </Row>
+            </h3>
+            </Modal.Title>
+          </Modal.Header>
+          <Modal.Body id={url}>
+            <Modal.Title><strong>Document Information</strong></Modal.Title>
+            <div id="info">
+              <p>
+                <strong>Title : </strong>{this.formatField(display.titleFieldType, display.titleField)}<br />
+                <strong>{display.subOneLabel} : </strong>{this.formatField(display.subOneType, display.subOne)}<br />
+              </p>
+            </div>
+          </Modal.Body>
+          <hr></hr>
+          <Modal.Body id={url}>
+            <Modal.Title><strong>Communication History</strong></Modal.Title>
+            <div id="comms">
+            </div>
+          </Modal.Body>
+          <Modal.Footer>
+          </Modal.Footer>
+        </Modal>
+      </div>
       );
   }
 }
