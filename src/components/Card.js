@@ -1,5 +1,5 @@
 import React, { Component, PropTypes } from 'react';
-import { Panel, Popover, Tooltip, Modal, OverlayTrigger, Button } from 'react-bootstrap';
+import { Panel, Popover, Tooltip, Modal, OverlayTrigger, Button, Grid, Row, Col } from 'react-bootstrap';
 import ItemTypes from '../constants/ItemTypes';
 import { DragSource } from 'react-dnd';
 
@@ -25,7 +25,7 @@ class Card extends Component {
     descr_1: PropTypes.object,
     descr_2: PropTypes.object,
     doc: PropTypes.object,
-    communications: PropTypes.object,
+    communications: PropTypes.array,
     connectDragSource: PropTypes.func.isRequired,
     isDragging: PropTypes.bool.isRequired,
     showModal: PropTypes.bool.isRequired,
@@ -36,6 +36,7 @@ class Card extends Component {
     this.setState({ showModal: false });
   }
   open() {
+    console.log(this.props)
     this.setState({ showModal: true });
   }
   log_call() {
@@ -122,6 +123,20 @@ class Card extends Component {
   get_form(form) {
     return { __html: form.form}
   }
+  get_comms() {
+    var embedCode = this.props.url;
+    var cardID = ".modal-body[id*='" + String(embedCode) + "'] #comms";
+    for (var i = 0; i < this.props.communications.length; i++) {
+      var created = "<strong>Created : </strong>" + String(this.props.communications[i]["creation"]) + "<br>"
+      var content = "<strong>Content : </strong>" + String(this.props.communications[i]["content"]) + "<br>"
+      var user = "<strong>User : </strong>" + String(this.props.communications[i]["user"]) + "<br>"
+      var newComm = "<p>" + created + user + content + "</p>"
+      if((i+1) != this.props.communications.length) {
+        newComm = newComm + "<hr>";
+      }
+      $(".modal-content").find(cardID).append(newComm);
+    }
+  }
   constructor(props) {
     super(props);
     this.open = this.open.bind(this);
@@ -132,6 +147,7 @@ class Card extends Component {
       showModal: false,
     }
     this.log_call = this.log_call.bind(this);
+    this.get_comms = this.get_comms.bind(this);
   }
 
   render() {
@@ -149,21 +165,39 @@ class Card extends Component {
               <br />{descr_2.label}: {descr_2.value}
             </small>
         </Panel>
-          <Modal show={this.state.showModal} onHide={this.close}>
+          <Modal show={this.state.showModal} onEnter={this.get_comms} onHide={this.close}>
             <Modal.Header>
               <Modal.Title>
-                <a href={url} onClick={this.closeApp}>
-                  <h3>{doc.doctype} - {title} - {doc.name}</h3>
-                </a>
+                <h3>
+                <Row>
+                  <Col sm={10}>
+                      <a href={url} onClick={this.closeApp}>
+                        {doc.doctype} - {title} - {doc.name}
+                      </a>
+                  </Col>
+                  <Col sm={2}>
+                    <Button onClick={this.log_call}>Log Call</Button>
+                  </Col>
+                </Row>
+              </h3>
               </Modal.Title>
             </Modal.Header>
-            <Modal.Body>
-              <div>
+            <Modal.Body id={url}>
+              <Modal.Title><strong>Lead Information</strong></Modal.Title>
+              <div id="info">
+                <p>
+                  <strong>Title : </strong>{title}<br />
+                  <strong>{descr_1.label} : </strong>{descr_1.value}<br />
+                </p>
+              </div>
+            </Modal.Body>
+            <hr></hr>
+            <Modal.Body id={url}>
+              <Modal.Title><strong>Communication History</strong></Modal.Title>
+              <div id="comms">
               </div>
             </Modal.Body>
             <Modal.Footer>
-              <Button onClick={this.close}>Close</Button>
-              <Button onClick={this.log_call}>Log Call</Button>
             </Modal.Footer>
           </Modal>
         </div>
