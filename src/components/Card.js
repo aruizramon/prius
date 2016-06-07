@@ -23,7 +23,6 @@ const cardSource = {
 class Card extends Component {
   static propTypes = {
     doc: PropTypes.object,
-    communications: PropTypes.array,
     display: PropTypes.object,
     connectDragSource: PropTypes.func.isRequired,
     isDragging: PropTypes.bool.isRequired,
@@ -34,7 +33,6 @@ class Card extends Component {
     this.setState({ showModal: false });
   }
   open() {
-    console.log(this.props)
     this.setState({ showModal: true });
   }
   log_call() {
@@ -125,16 +123,17 @@ class Card extends Component {
   get_comms() {
     var embedCode = this.props.url;
     var cardID = ".modal-body[id*='" + String(embedCode) + "'] #comms";
-    for (var i = 0; i < this.props.communications.length; i++) {
-      var created = "<strong>Created : </strong>" + String(this.props.communications[i]["creation"]) + "<br>"
-      var content = "<strong>Content : </strong>" + String(this.props.communications[i]["content"]) + "<br>"
-      var user = "<strong>User : </strong>" + String(this.props.communications[i]["user"]) + "<br>"
+    for (var i = 0; i < this.props.doc.communications.length; i++) {
+      var created = "<strong>Created : </strong>" + String(this.props.doc.communications[i]["creation"]) + "<br>"
+      var content = "<strong>Content : </strong>" + String(this.props.doc.communications[i]["content"]) + "<br>"
+      var user = "<strong>User : </strong>" + String(this.props.doc.communications[i]["user"]) + "<br>"
       var newComm = "<p>" + created + user + content + "</p>"
-      if((i+1) != this.props.communications.length) {
+      if((i+1) != this.props.doc.communications.length) {
         newComm = newComm + "<hr>";
       }
       $(".modal-content").find(cardID).append(newComm);
     }
+  }
   formatField(fieldtype, field) {
     if (fieldtype == 'Currency'){
       field = numeral(field).format('$0,0')
@@ -160,8 +159,7 @@ class Card extends Component {
   }
 
   render() {
-    const { title, doc, url, descr_1, descr_2, form, communications } = this.props;
-    const { doc, url, display, communications } = this.props;
+    const { doc, url, display } = this.props;
     const { connectDragSource, isDragging } = this.props;
     const { showModal } = this.state;
 

@@ -21506,7 +21506,8 @@
 	      return _react2.default.createElement(
 	        _reactBootstrap.Grid,
 	        { fluid: true },
-	        _react2.default.createElement(_BoardHeader2.default, { title: 'PriusJS', subtitle: 'by Spencer Schoeben' }),
+	        _react2.default.createElement('br', null),
+	        _react2.default.createElement('br', null),
 	        _react2.default.createElement(_Lists2.default, null)
 	      );
 	    }
@@ -49575,13 +49576,14 @@
 	            );
 	          })
 	        ),
+	        _react2.default.createElement('br', null),
 	        _react2.default.createElement(
 	          _reactBootstrap.Row,
 	          { style: rowStyles },
 	          lists.map(function (list) {
 	            return _react2.default.createElement(
 	              _reactBootstrap.Col,
-	              { style: columnStyles, sm: 6, md: 3 },
+	              { style: columnStyles, sm: 6, md: 2 },
 	              _react2.default.createElement(_List2.default, list)
 	            );
 	          })
@@ -49810,6 +49812,8 @@
 
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
+	var numeral = __webpack_require__(668);
+
 	var cardSource = {
 	  beginDrag: function beginDrag(props) {
 	    var id = props.id;
@@ -49839,15 +49843,111 @@
 	      this.setState({ showModal: true });
 	    }
 	  }, {
+	    key: 'log_call',
+	    value: function log_call() {
+	      this.setState({ showModal: false });
+	      var card = this;
+	      var lead_prompt_info = [{ label: "Contact", fieldtype: "Data", default: this.props.doc.lead_name, read_only: "1" }, { fieldtype: "Column Break" }, { label: "Phone", fieldname: "phone_no", fieldtype: "Data", default: this.props.doc.phone, read_only: "1" }, { fieldtype: "Section Break" }, { label: "Sent or Received", fieldname: "sent_or_received",
+	        fieldtype: "Select", options: ["Sent", "Received"], default: "Sent" }, { fieldtype: "Column Break" }, { label: "Next Contact Date", fieldtype: "Date", reqd: "1" }, { fieldtype: "Section Break" }, { label: "Subject", fieldtype: "Data", default: "Call " + new Date() }, { fieldtype: "Section Break" }, { label: "Notes", fieldname: "content", fieldtype: "Small Text", reqd: "1" }];
+	      frappe.call({
+	        method: "frappe.client.get_list",
+	        args: {
+	          "doctype": "Communication",
+	          "fields": ["Subject", "Content", "Communication_Date", "Communication_Type"],
+	          "filters": {
+	            "reference_doctype": card.props.doc.doctype,
+	            "reference_name": card.props.doc.name,
+	            "communication_type": ["in", ["Comment", "Communication"]]
+	          }
+	        },
+	        callback: function callback(r) {
+	          lead_prompt_info.push({ fieldtype: "Section Break" });
+	          var newMessage = "new";
+	          if (r.message != undefined) {
+	            r.message.forEach(function (foo) {
+	              var content = "";
+	              if (foo.Communication_Type == "Comment") {
+	                if (foo.Content != null && foo.Subject != null && foo.Content < foo.Subject) {
+	                  content = foo.Subject + '\n' + foo.Content;
+	                } else if (foo.Content != null) {
+	                  content = foo.Content;
+	                } else if (foo.Subject != null) {
+	                  content = foo.Subject;
+	                }
+	                newMessage = { label: "<i class='octicon octicon-comment-discussion icon-fixed-width'></i> Comment - " + foo.Communication_Date, fieldname: "message",
+	                  fieldtype: "Small Text", default: content, read_only: "1" };
+	              } else if (foo.Communication_Type == "Communication") {
+	                content = foo.Subject + '\n' + foo.Content;
+	                newMessage = { label: "<i class='octicon octicon-device-mobile icon-fixed-width'></i> Communication", fieldname: "message",
+	                  fieldtype: "Small Text", default: content, read_only: "1" };
+	              }
+	              var state = true;
+	              lead_prompt_info.forEach(function (bar) {
+	                if (JSON.stringify(bar) == JSON.stringify(newMessage)) {
+	                  state = false;
+	                }
+	              });
+	              if (state) {
+	                lead_prompt_info.push(newMessage);
+	                lead_prompt_info.push({ fieldtype: "Section Break" });
+	              }
+	            });
+	          }
+	          var communication = frappe.prompt(lead_prompt_info, function (data) {
+	            data.doctype = "Communication";
+	            data.reference_doctype = card.props.doc.doctype;
+	            data.reference_name = card.props.doc.name;
+	            card.props.doc.contact_date = data.next_contact_date;
+	            frappe.call({
+	              method: "frappe.client.insert",
+	              args: {
+	                "doc": data
+	              }
+	            });
+	          });
+	        }
+	      });
+	    }
+	  }, {
 	    key: 'closeApp',
 	    value: function closeApp() {
 	      this.setState({ showModal: false });
 	      window.location.reload();
 	    }
+	    // unused
+
 	  }, {
-	    key: 'get_form',
-	    value: function get_form(form) {
+	    key: 'getForm',
+	    value: function getForm(form) {
 	      return { __html: form.form };
+	    }
+	  }, {
+	    key: 'get_comms',
+	    value: function get_comms() {
+	      var embedCode = this.props.url;
+	      var cardID = ".modal-body[id*='" + String(embedCode) + "'] #comms";
+	      for (var i = 0; i < this.props.doc.communications.length; i++) {
+	        var created = "<strong>Created : </strong>" + String(this.props.doc.communications[i]["creation"]) + "<br>";
+	        var content = "<strong>Content : </strong>" + String(this.props.doc.communications[i]["content"]) + "<br>";
+	        var user = "<strong>User : </strong>" + String(this.props.doc.communications[i]["user"]) + "<br>";
+	        var newComm = "<p>" + created + user + content + "</p>";
+	        if (i + 1 != this.props.doc.communications.length) {
+	          newComm = newComm + "<hr>";
+	        }
+	        $(".modal-content").find(cardID).append(newComm);
+	      }
+	    }
+	  }, {
+	    key: 'formatField',
+	    value: function formatField(fieldtype, field) {
+	      if (fieldtype == 'Currency') {
+	        field = numeral(field).format('$0,0');
+	      } else if (fieldtype == 'Int') {
+	        field = numeral(field).format('0,0');
+	      } else if (fieldtype == 'Float') {
+	        field = numeral(field).format('0,0.00');
+	      }
+	      return field;
 	    }
 	  }]);
 
@@ -49859,10 +49959,13 @@
 	    _this.open = _this.open.bind(_this);
 	    _this.close = _this.close.bind(_this);
 	    _this.closeApp = _this.closeApp.bind(_this);
-	    _this.get_form = _this.get_form.bind(_this);
+	    _this.getForm = _this.getForm.bind(_this);
+	    _this.formatField = _this.formatField.bind(_this);
 	    _this.state = {
 	      showModal: false
 	    };
+	    _this.log_call = _this.log_call.bind(_this);
+	    _this.get_comms = _this.get_comms.bind(_this);
 	    return _this;
 	  }
 
@@ -49870,12 +49973,9 @@
 	    key: 'render',
 	    value: function render() {
 	      var _props = this.props;
-	      var title = _props.title;
 	      var doc = _props.doc;
 	      var url = _props.url;
-	      var descr_1 = _props.descr_1;
-	      var descr_2 = _props.descr_2;
-	      var form = _props.form;
+	      var display = _props.display;
 	      var _props2 = this.props;
 	      var connectDragSource = _props2.connectDragSource;
 	      var isDragging = _props2.isDragging;
@@ -49888,23 +49988,23 @@
 	        _react2.default.createElement(
 	          _reactBootstrap.Panel,
 	          { bsStyle: 'primary',
-	            header: title,
+	            header: display.titleField,
 	            onClick: this.open },
 	          _react2.default.createElement(
 	            'small',
 	            null,
-	            descr_1.label,
-	            ': ',
-	            descr_1.value,
+	            display.subOneLabel,
+	            ' - ',
+	            this.formatField(display.subOneType, display.subOne),
 	            _react2.default.createElement('br', null),
-	            descr_2.label,
-	            ': ',
-	            descr_2.value
+	            display.subTwoLabel,
+	            ' - ',
+	            this.formatField(display.subTwoType, display.subTwo)
 	          )
 	        ),
 	        _react2.default.createElement(
 	          _reactBootstrap.Modal,
-	          { show: showModal, onHide: this.close },
+	          { show: this.state.showModal, onEnter: this.get_comms, onHide: this.close },
 	          _react2.default.createElement(
 	            _reactBootstrap.Modal.Header,
 	            null,
@@ -49912,35 +50012,89 @@
 	              _reactBootstrap.Modal.Title,
 	              null,
 	              _react2.default.createElement(
-	                'a',
-	                { href: url, onClick: this.closeApp },
+	                'h3',
+	                null,
 	                _react2.default.createElement(
-	                  'h3',
+	                  _reactBootstrap.Row,
 	                  null,
-	                  doc.doctype,
-	                  ' - ',
-	                  title,
-	                  ' - ',
-	                  doc.name
+	                  _react2.default.createElement(
+	                    _reactBootstrap.Col,
+	                    { sm: 10 },
+	                    _react2.default.createElement(
+	                      'a',
+	                      { href: url, onClick: this.closeApp },
+	                      doc.doctype,
+	                      ' - ',
+	                      this.formatField(display.titleFieldType, display.titleField),
+	                      ' - ',
+	                      doc.name
+	                    )
+	                  ),
+	                  _react2.default.createElement(
+	                    _reactBootstrap.Col,
+	                    { sm: 2 },
+	                    _react2.default.createElement(
+	                      _reactBootstrap.Button,
+	                      { onClick: this.log_call },
+	                      'Log Call'
+	                    )
+	                  )
 	                )
 	              )
 	            )
 	          ),
 	          _react2.default.createElement(
 	            _reactBootstrap.Modal.Body,
-	            null,
-	            _react2.default.createElement('div', { id: 'form-popup',
-	              dangerouslySetInnerHTML: this.get_form({ form: form }) })
-	          ),
-	          _react2.default.createElement(
-	            _reactBootstrap.Modal.Footer,
-	            null,
+	            { id: url },
 	            _react2.default.createElement(
-	              _reactBootstrap.Button,
-	              { onClick: this.close },
-	              'Close'
+	              _reactBootstrap.Modal.Title,
+	              null,
+	              _react2.default.createElement(
+	                'strong',
+	                null,
+	                'Document Information'
+	              )
+	            ),
+	            _react2.default.createElement(
+	              'div',
+	              { id: 'info' },
+	              _react2.default.createElement(
+	                'p',
+	                null,
+	                _react2.default.createElement(
+	                  'strong',
+	                  null,
+	                  'Title : '
+	                ),
+	                this.formatField(display.titleFieldType, display.titleField),
+	                _react2.default.createElement('br', null),
+	                _react2.default.createElement(
+	                  'strong',
+	                  null,
+	                  display.subOneLabel,
+	                  ' : '
+	                ),
+	                this.formatField(display.subOneType, display.subOne),
+	                _react2.default.createElement('br', null)
+	              )
 	            )
-	          )
+	          ),
+	          _react2.default.createElement('hr', null),
+	          _react2.default.createElement(
+	            _reactBootstrap.Modal.Body,
+	            { id: url },
+	            _react2.default.createElement(
+	              _reactBootstrap.Modal.Title,
+	              null,
+	              _react2.default.createElement(
+	                'strong',
+	                null,
+	                'Communication History'
+	              )
+	            ),
+	            _react2.default.createElement('div', { id: 'comms' })
+	          ),
+	          _react2.default.createElement(_reactBootstrap.Modal.Footer, null)
 	        )
 	      ));
 	    }
@@ -49948,15 +50102,12 @@
 
 	  return Card;
 	}(_react.Component), _class2.propTypes = {
-	  title: _react.PropTypes.string.isRequired,
-	  descr_1: _react.PropTypes.object,
-	  descr_2: _react.PropTypes.object,
 	  doc: _react.PropTypes.object,
+	  display: _react.PropTypes.object,
 	  connectDragSource: _react.PropTypes.func.isRequired,
 	  isDragging: _react.PropTypes.bool.isRequired,
 	  showModal: _react.PropTypes.bool.isRequired,
-	  url: _react.PropTypes.string,
-	  form: _react.PropTypes.any
+	  url: _react.PropTypes.string
 	}, _temp)) || _class);
 	exports.default = Card;
 
@@ -50722,7 +50873,6 @@
 	      var mappedOptions = options.map(function (value) {
 	        return { label: value, value: value };
 	      });
-	      console.log(mappedOptions);
 	      if (type == "SimpleSelect") {
 	        return _react2.default.createElement(SimpleSelect, {
 	          options: mappedOptions,
