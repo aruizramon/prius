@@ -1,5 +1,6 @@
 import React, { Component, PropTypes } from 'react';
-import { Panel, Popover, Tooltip, Modal, OverlayTrigger, Button, Grid, Row, Col } from 'react-bootstrap';
+import { Panel, Popover, Tooltip, Modal, OverlayTrigger, Button } from 'react-bootstrap';
+import { Form, FormGroup, ControlLabel, Row, Col } from 'react-bootstrap';
 import ItemTypes from '../constants/ItemTypes';
 import { DragSource } from 'react-dnd';
 var numeral = require('numeral');
@@ -120,19 +121,94 @@ class Card extends Component {
   getForm(form) {
     return { __html: form.form}
   }
-  get_comms() {
-    var embedCode = this.props.url;
-    var cardID = ".modal-body[id*='" + String(embedCode) + "'] #comms";
+  addValue() {
+    var url = this.props.url;
+    var cardID = ".modal-body[id*='" + String(url) + "']";
+    var info = this.getInfo();
+    var comm = this.getComms();
+    $(".modal-content").find(cardID).append(info);
+    $(".modal-content").find(cardID).append(comm);
+  }
+  getInfo() {
+    var newInfo = "<div class='panel panel-default' style='margin:-15px;'>"
+      + "<div class='panel-heading'><h4 class='panel-title'>"
+      + "Doccument Information"
+      + "</h4></div><div class='panel'>"
+    var title = '<div class="form-group" style="padding-left:15px;"><label class="control-label">'
+      + this.props.display.titleFieldLabel
+      + '</label><p class="form-control-static">'
+      + this.formatField(this.props.display.titleFieldType, this.props.display.titleField)
+      + '</p></div>'
+    var person_name = '<div class="form-group" style="padding-left:15px;"><label class="control-label">'
+      + this.props.display.subOneLabel
+      + '</label><p class="form-control-static">'
+      + this.formatField(this.props.display.subOneType, this.props.display.subOne)
+      + '</p></div>'
+    var source = '<div class="form-group" style="padding-left:15px;"><label class="control-label">'
+      + this.props.display.subTwoLabel
+      + '</label><p class="form-control-static">'
+      + this.formatField(this.props.display.subTwoType, this.props.display.subTwo)
+      + '</p></div>'
+    var phone = '<div class="form-group" style="padding-left:15px;"><label class="control-label">'
+      + this.props.display.fieldTwoLabel
+      + '</label><p class="form-control-static">'
+      + this.formatField(this.props.display.fieldTwoType, this.props.display.fieldTwo)
+      + '</p></div>'
+    var email = '<div class="form-group" style="padding-left:15px;"><label class="control-label">'
+      + this.props.display.fieldThreeLabel
+      + '</label><p class="form-control-static">'
+      + this.formatField(this.props.display.fieldThreeType, this.props.display.fieldThree)
+      + '</p></div>'
+    var next_date = '<div class="form-group" style="padding-left:15px;"><label class="control-label">'
+      + this.props.display.fieldOneLabel
+      + '</label><p class="form-control-static">'
+      + this.formatField(this.props.display.fieldOneType, this.props.display.fieldOne)
+      + '</p></div>'
+    var col1 = '<div class="col-sm-6"><p>'
+      + title + person_name + source
+      + '</div>'
+    var col2 = '<div class="col-sm-6"><p>'
+      + phone + email + next_date
+      + '</div>'
+    newInfo = newInfo + '<div class="row">' + col1 + col2 + '</div></div>'
+    return newInfo
+  }
+  getComms() {
+    var comm = "<div class='panel panel-default' style='margin:-15px;'>"
+      + "<div class='panel-heading' data-toggle='collapse' href='#collapse1'><h4 class='panel-title'>"
+      + "Communication History"
+      + "<i class='octicon octicon-chevron-down icon-fixed-width' style='float:right;'></i>"
+      + "</h4></div><div id='collapse1' class='panel-collapse collapse'>"
     for (var i = 0; i < this.props.doc.communications.length; i++) {
-      var created = "<strong>Created : </strong>" + String(this.props.doc.communications[i]["creation"]) + "<br>"
-      var content = "<strong>Content : </strong>" + String(this.props.doc.communications[i]["content"]) + "<br>"
-      var user = "<strong>User : </strong>" + String(this.props.doc.communications[i]["user"]) + "<br>"
-      var newComm = "<p>" + created + user + content + "</p>"
-      if((i+1) != this.props.doc.communications.length) {
-        newComm = newComm + "<hr>";
+      var type = this.props.doc.communications[i]["communication_type"]
+      if(type == "Comment") {
+        var date = this.props.doc.communications[i]["communication_date"]
+        var commType = "<span style='padding-left:15px;'><strong>"
+                        + "<i class='octicon octicon-comment-discussion icon-fixed-width'></i> "
+                        + type + "</strong> : " + date + "</span><br>"
+
+      } else if(type == "Communication") {
+        var commType = "<span style='padding-left:15px;'><strong>"
+                        + "<i class='octicon octicon-device-mobile icon-fixed-width'></i> "
+                        + type + "</strong></span><br>"
       }
-      $(".modal-content").find(cardID).append(newComm);
+      var subject = "<span style='padding-left:5px;'><strong>Subject : </strong>"
+                     + String(this.props.doc.communications[i]["subject"]) + "</span><br>"
+      var content = "<span style='padding-left:5px;'><strong>Content : </strong>"
+                     + String(this.props.doc.communications[i]["content"]) + "</span><br>"
+      var user = "<span style='padding-left:5px;'><strong>User : </strong>"
+                  + String(this.props.doc.communications[i]["user"]) + "<br>"
+      var newComm = "<div class='row'>"
+                     + "<div class='col-sm-12'><p>"
+                     + commType
+                     + "<pre style='margin-left:5px; margin-right:5px;"
+                     + " white-space: pre-wrap; white-space: -moz-pre-wrap;"
+                     + " white-space: -pre-wrap; white-space: -o-pre-wrap; word-wrap: break-word;'>"
+                     + subject + user + content + "</pre></p></div></div>"
+      comm = comm + newComm
     }
+    comm = comm + "</div></div>"
+    return comm
   }
   formatField(fieldtype, field) {
     if (fieldtype == 'Currency') {
@@ -179,7 +255,9 @@ class Card extends Component {
       showModal: false,
     }
     this.log_call = this.log_call.bind(this);
-    this.get_comms = this.get_comms.bind(this);
+    this.addValue = this.addValue.bind(this);
+    this.getInfo = this.getInfo.bind(this);
+    this.getComms = this.getComms.bind(this);
   }
 
   render() {
@@ -198,40 +276,27 @@ class Card extends Component {
               {display.subTwoLabel} - {this.formatField(display.subTwoType, display.subTwo)}
             </small>
         </Panel>
-        <Modal show={this.state.showModal} onEnter={this.get_comms} onHide={this.close}>
+
+        <Modal show={this.state.showModal} onEnter={this.addValue} onHide={this.close}>
           <Modal.Header>
             <Modal.Title>
               <h4>
-              <Row>
-                <Col sm={10}>
-                    <a href={url} onClick={this.closeApp}>
-                      {doc.doctype} - {this.formatField(display.titleFieldType, display.titleField)} - {doc.name}
-                    </a>
-                </Col>
-                <Col sm={2}>
-                  <Button onClick={this.log_call}>Log Call</Button>
-                </Col>
-              </Row>
-            </h4>
+                <Row>
+                  <Col sm={8}>
+                      <a href={url} onClick={this.closeApp}>
+                        {doc.doctype} - {this.formatField(display.titleFieldType, display.titleField)} - {doc.name}
+                      </a>
+                  </Col>
+                  <Col sm={4}>
+                    <Button onClick={this.log_call}>Log Call</Button><span> </span>
+                    <Button onClick={this.close}>Cancel</Button>
+                  </Col>
+                </Row>
+              </h4>
             </Modal.Title>
           </Modal.Header>
           <Modal.Body id={url}>
-            <Modal.Title><strong>Document Information</strong></Modal.Title>
-            <div id="info">
-              <p>
-                <strong>Title : </strong>{this.formatField(display.titleFieldType, display.titleField)}<br />
-                <strong>{display.subOneLabel} : </strong>{this.formatField(display.subOneType, display.subOne)}<br />
-              </p>
-            </div>
           </Modal.Body>
-          <hr></hr>
-          <Modal.Body id={url}>
-            <Modal.Title><strong>Communication History</strong></Modal.Title>
-            <div id="comms">
-            </div>
-          </Modal.Body>
-          <Modal.Footer>
-          </Modal.Footer>
         </Modal>
       </div>
       );
