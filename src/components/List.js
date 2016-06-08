@@ -59,11 +59,11 @@ export default class List extends Component {
     description: PropTypes.object
   }
   formatNumber(fieldtype, number) {
-    if (fieldtype == 'Currency'){
+    if (fieldtype == 'Currency') {
       number = numeral(number).format('$0,0')
-    } else if (fieldtype == 'Int'){
+    } else if (fieldtype == 'Int') {
       number = numeral(number).format('0,0')
-    } else if (fieldtype == 'Float'){
+    } else if (fieldtype == 'Float') {
       number = numeral(number).format('0,0.00')
     }
     return number
@@ -73,8 +73,11 @@ export default class List extends Component {
     for (var i = 0; i < cards.length; i++) {
       sum = sum + cards[i].doc[field.fieldname];
     }
-
-    return { sum: this.formatNumber(field.fieldtype, sum) }
+    if (!isNaN(sum)) {
+      return { sum: this.formatNumber(field.fieldtype, sum) }
+    } else {
+      return { sum: null }
+    }
   }
   constructor(props){
     super(props);
