@@ -1,1 +1,96 @@
+/*.missingData {
+  border-color: ;
+}
+.missingData > .panel-heading {
+  background-color: ;
+  color: #ffffff;
+}
+.missingData > .panel-body {
+  background-color: rgba(, .05);
+  color: ;
+}
+.stale {
+  border-color: ;
+}
+.stale > .panel-heading {
+  background-color: ;
+  color: #ffffff;
+}
+.stale > .panel-body {
+  background-color: rgba(, .05);
+}
+.pastDueCall {
+  border-color: ;
+}
+.pastDueCall > .panel-heading {
+  background-color: ;
+  color: #ffffff;
+}
+.pastDueCall > .panel-body {
+  background-color: rgba(, .05);
+}
+.imminentTask {
+  border-color: ;
+}
+.imminentTask > .panel-heading {
+  background-color: ;
+  color: #ffffff;
+}
+.imminentTask > .panel-body {
+  background-color: rgba(, .05);
+}
+.imminentContact {
+  border-color: ;
+}
+.imminentContact > .panel-heading {
+  background-color: ;
+  color: #ffffff;
+}
+.imminentContact > .panel-body {
+  background-color: rgba(, .05);
+}
+.statusOK {
+  border-color: ;
+}
+.statusOK > .panel-heading {
+  background-color: ;
+  color: #ffffff;
+}
+.statusOK > .panel-body {
+  background-color: rgba(, .05);
+}*/
 
+
+/*
+::Option 1::
+#52be80 - statusOK
+#cd6155 - pastDueCall
+#eb984e - immenentContact
+#f4d03f - immenentTask
+#5499c7 - missingData
+#aab7b8 - stale
+
+::Option 2::
+#2ecc71 - statusOK
+#c0392b - pastDueCall
+#f39c12 - imminentContact
+#5499c7 - immenentTask
+#34495e - missingData
+#aab7b8 - stale
+
+::Option 3::
+#27ae60 - statusOK
+#cd6155 - pastDueCall
+#f4d03f - imminentContact
+#5dade2 - immenentTask
+#a569bd - missingData
+#2c3e50 - stale
+
+::Option 4::
+#85c1e9 - statusOK
+#d98880 - pastDueCall
+#f8c471 - imminentContact
+#e59866 - immenentTask
+#c39bd3 - missingData
+#cacfd2 - stale
+*/
