@@ -26,6 +26,7 @@ export default class Filter extends Component {
       return <SimpleSelect
                 options={mappedOptions}
                 placeholder={title}
+                theme="material"
                 onValueChange = {function(value){
                   self.setState(value);
                   self.props.setFilter(id, value);
@@ -35,6 +36,7 @@ export default class Filter extends Component {
       return <MultiSelect
                 options={mappedOptions}
                 placeholder={title}
+                theme="material"
                 onValuesChange = {function(values){
                   self.setState(values);
                   self.props.setFilter(id, values);

@@ -34,7 +34,7 @@ export default class Lists extends Component {
         <br />
         <Row>
           {filters.map((filter) =>
-            <Col sm={6} md={4}>
+            <Col sm={6} md={4} lg={4}>
               <Filter {...filter} />
             </Col>
           )}
