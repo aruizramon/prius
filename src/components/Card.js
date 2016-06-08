@@ -3,7 +3,7 @@ import { Panel, Popover, Tooltip, Modal, OverlayTrigger, Button, Grid, Row, Col 
 import ItemTypes from '../constants/ItemTypes';
 import { DragSource } from 'react-dnd';
 var numeral = require('numeral');
-
+var moment = require('moment');
 
 const cardSource = {
   beginDrag(props) {
@@ -144,6 +144,25 @@ class Card extends Component {
     }
     return field
   }
+  getStyle(doc, display) {
+    for (var prop in display) {
+      if (display.hasOwnProperty(prop)) {
+        if (display[prop] == null) {
+          return "danger"
+        }
+      }
+    }
+    var now = moment();
+    var contact = moment(doc.contact_date);
+    var nextWeek = now.clone().add(7, 'days');
+    console.log(now, doc.contact_date, contact, nextWeek);
+    if (contact < now) {
+      return "warning"
+    } else if (now <= contact && contact <= nextWeek){
+      return "primary"
+    }
+    return "info"
+  }
   constructor(props) {
     super(props);
     this.open = this.open.bind(this);
@@ -151,6 +170,7 @@ class Card extends Component {
     this.closeApp = this.closeApp.bind(this);
     this.getForm = this.getForm.bind(this);
     this.formatField = this.formatField.bind(this);
+    this.getStyle = this.getStyle.bind(this);
     this.state = {
       showModal: false,
     }
@@ -165,7 +185,7 @@ class Card extends Component {
 
     return (
       <div className="kanban-card">
-        <Panel bsStyle="primary"
+        <Panel bsStyle={this.getStyle(doc, display)}
                header={display.titleField}
                onClick={this.open}>
             <small>
@@ -177,7 +197,7 @@ class Card extends Component {
         <Modal show={this.state.showModal} onEnter={this.get_comms} onHide={this.close}>
           <Modal.Header>
             <Modal.Title>
-              <h3>
+              <h4>
               <Row>
                 <Col sm={10}>
                     <a href={url} onClick={this.closeApp}>
@@ -188,7 +208,7 @@ class Card extends Component {
                   <Button onClick={this.log_call}>Log Call</Button>
                 </Col>
               </Row>
-            </h3>
+            </h4>
             </Modal.Title>
           </Modal.Header>
           <Modal.Body id={url}>

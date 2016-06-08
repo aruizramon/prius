@@ -59,6 +59,7 @@
     "webpack-hot-middleware": "^2.10.0"
   },
   "dependencies": {
+    "moment": "^2.13.0",
     "react": "^0.14.8",
     "react-bootstrap": "^0.28.5",
     "react-bootstrap-select": "^0.14.0",
