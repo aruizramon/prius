@@ -29,7 +29,7 @@ const isHidden = (doc, filters) => {
   var hidden = false;
   filters.forEach(function(filter) {
     if (filter.values.length > 0) {
-      if (!checkFilterMatch(filter.values, doc[filter.id])){
+      if (doc.hasOwnProperty(filter.id) && !checkFilterMatch(filter.values, doc[filter.id])){
         hidden = true;
       }
     }
