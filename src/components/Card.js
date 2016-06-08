@@ -163,7 +163,7 @@ class Card extends Component {
     const { connectDragSource, isDragging } = this.props;
     const { showModal } = this.state;
 
-    return connectDragSource(
+    return (
       <div className="kanban-card">
         <Panel bsStyle="primary"
                header={display.titleField}

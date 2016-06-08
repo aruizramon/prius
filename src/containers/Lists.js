@@ -42,7 +42,7 @@ export default class Lists extends Component {
         <br />
         <Row style={rowStyles}>
           {lists.map((list) =>
-            <Col style={columnStyles} sm={6} md={2}>
+            <Col style={columnStyles} sm={6} md={3} lg={2}>
               <List {...list} />
             </Col>
           )}
