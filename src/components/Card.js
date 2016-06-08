@@ -3,6 +3,7 @@ import { Panel, Popover, Tooltip, Modal, OverlayTrigger, Button } from 'react-bo
 import { Form, FormGroup, ControlLabel, Row, Col } from 'react-bootstrap';
 import ItemTypes from '../constants/ItemTypes';
 import { DragSource } from 'react-dnd';
+import '../style.css'
 var numeral = require('numeral');
 var moment = require('moment');
 
@@ -280,19 +281,17 @@ class Card extends Component {
         <Modal show={this.state.showModal} onEnter={this.addValue} onHide={this.close}>
           <Modal.Header>
             <Modal.Title>
-              <h4>
-                <Row>
-                  <Col sm={8}>
-                      <a href={url} onClick={this.closeApp}>
-                        {doc.doctype} - {this.formatField(display.titleFieldType, display.titleField)} - {doc.name}
-                      </a>
-                  </Col>
-                  <Col sm={4}>
-                    <Button onClick={this.log_call}>Log Call</Button><span> </span>
-                    <Button onClick={this.close}>Cancel</Button>
-                  </Col>
-                </Row>
-              </h4>
+              <Row>
+                <Col sm={8}>
+                    <a href={url} onClick={this.closeApp}>
+                      {doc.doctype} - {this.formatField(display.titleFieldType, display.titleField)} - {doc.name}
+                    </a>
+                </Col>
+                <Col sm={4}>
+                  <Button onClick={this.log_call}>Log Call</Button><span> </span>
+                  <Button onClick={this.close}>Cancel</Button>
+                </Col>
+              </Row>
             </Modal.Title>
           </Modal.Header>
           <Modal.Body id={url}>
