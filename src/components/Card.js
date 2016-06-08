@@ -135,16 +135,21 @@ class Card extends Component {
     }
   }
   formatField(fieldtype, field) {
-    if (fieldtype == 'Currency'){
+    if (fieldtype == 'Currency') {
       field = numeral(field).format('$0,0')
-    } else if (fieldtype == 'Int'){
+    } else if (fieldtype == 'Int') {
       field = numeral(field).format('0,0')
-    } else if (fieldtype == 'Float'){
+    } else if (fieldtype == 'Float') {
       field = numeral(field).format('0,0.00')
+    } else if (fieldtype == 'Date' || fieldtype == 'Datetime') {
+      if (field != null) {
+        field = moment(field).format('dddd, MMM Do, YYYY')
+      }
     }
     return field
   }
   getStyle(doc, display) {
+    // if a card field is null, danger
     for (var prop in display) {
       if (display.hasOwnProperty(prop)) {
         if (display[prop] == null) {
@@ -155,13 +160,12 @@ class Card extends Component {
     var now = moment();
     var contact = moment(doc.contact_date);
     var nextWeek = now.clone().add(7, 'days');
-    console.log(now, doc.contact_date, contact, nextWeek);
     if (contact < now) {
       return "warning"
     } else if (now <= contact && contact <= nextWeek){
-      return "primary"
+      return "info"
     }
-    return "info"
+    return "default"
   }
   constructor(props) {
     super(props);
