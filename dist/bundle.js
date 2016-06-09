@@ -49571,7 +49571,7 @@
 	          filters.map(function (filter) {
 	            return _react2.default.createElement(
 	              _reactBootstrap.Col,
-	              { sm: 6, md: 4 },
+	              { sm: 6, md: 4, lg: 4 },
 	              _react2.default.createElement(_Filter2.default, filter)
 	            );
 	          })
@@ -49937,40 +49937,45 @@
 	      $(".modal-content").find(cardID).append(info);
 	      $(".modal-content").find(cardID).append(comm);
 	    }
+	    // moved html to here from getInfo to make it easier to change styling
+
+	  }, {
+	    key: 'makeField',
+	    value: function makeField(field, label) {
+	      return '<div class="form-group" style="padding-left:15px;"><label class="control-label">' + label + '</label><br />' + field + '</div><br />';
+	    }
 	  }, {
 	    key: 'getInfo',
 	    value: function getInfo() {
-	      var newInfo = "<div class='panel panel-default' style='margin:-15px;'>" + "<div class='panel-heading'><h4 class='panel-title'>" + "Doccument Information" + "</h4></div><div class='panel'>";
-	      var title = '<div class="form-group" style="padding-left:15px;"><label class="control-label">' + this.props.display.titleFieldLabel + '</label><p class="form-control-static">' + this.formatField(this.props.display.titleFieldType, this.props.display.titleField) + '</p></div>';
-	      var person_name = '<div class="form-group" style="padding-left:15px;"><label class="control-label">' + this.props.display.subOneLabel + '</label><p class="form-control-static">' + this.formatField(this.props.display.subOneType, this.props.display.subOne) + '</p></div>';
-	      var source = '<div class="form-group" style="padding-left:15px;"><label class="control-label">' + this.props.display.subTwoLabel + '</label><p class="form-control-static">' + this.formatField(this.props.display.subTwoType, this.props.display.subTwo) + '</p></div>';
-	      var phone = '<div class="form-group" style="padding-left:15px;"><label class="control-label">' + this.props.display.fieldTwoLabel + '</label><p class="form-control-static">' + this.formatField(this.props.display.fieldTwoType, this.props.display.fieldTwo) + '</p></div>';
-	      var email = '<div class="form-group" style="padding-left:15px;"><label class="control-label">' + this.props.display.fieldThreeLabel + '</label><p class="form-control-static">' + this.formatField(this.props.display.fieldThreeType, this.props.display.fieldThree) + '</p></div>';
-	      var next_date = '<div class="form-group" style="padding-left:15px;"><label class="control-label">' + this.props.display.fieldOneLabel + '</label><p class="form-control-static">' + this.formatField(this.props.display.fieldOneType, this.props.display.fieldOne) + '</p></div>';
-	      var col1 = '<div class="col-sm-6"><p>' + title + person_name + source + '</div>';
-	      var col2 = '<div class="col-sm-6"><p>' + phone + email + next_date + '</div>';
-	      newInfo = newInfo + '<div class="row">' + col1 + col2 + '</div></div>';
-	      return newInfo;
+	      var subtitleOne = this.makeField(this.formatField(this.props.display.subOneType, this.props.display.subOne), this.props.display.subOneLabel);
+	      var subtitleTwo = this.makeField(this.formatField(this.props.display.subTwoType, this.props.display.subTwo), this.props.display.subTwoLabel);
+	      var fieldOne = this.makeField(this.formatField(this.props.display.fieldOneType, this.props.display.fieldOne), this.props.display.fieldOneLabel);
+	      var fieldTwo = this.makeField(this.formatField(this.props.display.fieldTwoType, this.props.display.fieldTwo), this.props.display.fieldTwoLabel);
+	      var fieldThree = this.makeField(this.formatField(this.props.display.fieldThreeType, this.props.display.fieldThree), this.props.display.fieldThreeLabel);
+	      var fieldFour = this.makeField(this.formatField(this.props.display.fieldFourType, this.props.display.fieldFour), this.props.display.fieldFourLabel);
+	      var col1 = '<div class="col-sm-6"><p>' + subtitleOne + fieldOne + fieldTwo + '</div>';
+	      var col2 = '<div class="col-sm-6"><p>' + subtitleTwo + fieldThree + fieldFour + '</div>';
+	      return '<div class="row">' + col1 + col2 + '</div></div><br />';
 	    }
 	  }, {
 	    key: 'getComms',
 	    value: function getComms() {
-	      var comm = "<div class='panel panel-default' style='margin:-15px;'>" + "<div class='panel-heading' data-toggle='collapse' href='#collapse1'><h4 class='panel-title'>" + "Communication History" + "<i class='octicon octicon-chevron-down icon-fixed-width' style='float:right;'></i>" + "</h4></div><div id='collapse1' class='panel-collapse collapse'>";
+	      var comm = "<div class='panel panel-default' style='margin:-15px;'>" + "<div class='panel-heading' data-toggle='collapse' href='#collapse1'>" + "Communication History" + "<i class='octicon octicon-chevron-down icon-fixed-width' style='float:right;'></i>" + "</div><div id='collapse1' class='panel-collapse collapse'>";
 	      for (var i = 0; i < this.props.doc.communications.length; i++) {
 	        var type = this.props.doc.communications[i]["communication_type"];
+	        var date = this.formatField('Date', this.props.doc.communications[i]["communication_date"]);
 	        if (type == "Comment") {
-	          var date = this.props.doc.communications[i]["communication_date"];
-	          var commType = "<span style='padding-left:15px;'><strong>" + "<i class='octicon octicon-comment-discussion icon-fixed-width'></i> " + type + "</strong> : " + date + "</span><br>";
+	          var commType = "<span style='padding-left:15px;'><strong>" + "<i class='octicon octicon-comment-discussion icon-fixed-width'></i> " + type + "</strong>: " + date + "</span><br>";
 	        } else if (type == "Communication") {
-	          var commType = "<span style='padding-left:15px;'><strong>" + "<i class='octicon octicon-device-mobile icon-fixed-width'></i> " + type + "</strong></span><br>";
+	          var commType = "<span style='padding-left:15px;'><strong>" + "<i class='octicon octicon-device-mobile icon-fixed-width'></i> " + type + "</strong>: " + date + "</span><br>";
 	        }
-	        var subject = "<span style='padding-left:5px;'><strong>Subject : </strong>" + String(this.props.doc.communications[i]["subject"]) + "</span><br>";
-	        var content = "<span style='padding-left:5px;'><strong>Content : </strong>" + String(this.props.doc.communications[i]["content"]) + "</span><br>";
-	        var user = "<span style='padding-left:5px;'><strong>User : </strong>" + String(this.props.doc.communications[i]["user"]) + "<br>";
-	        var newComm = "<div class='row'>" + "<div class='col-sm-12'><p>" + commType + "<pre style='margin-left:5px; margin-right:5px;" + " white-space: pre-wrap; white-space: -moz-pre-wrap;" + " white-space: -pre-wrap; white-space: -o-pre-wrap; word-wrap: break-word;'>" + subject + user + content + "</pre></p></div></div>";
+	        var subject = "<span style='padding-left:15px;'><strong>Subject : </strong>" + String(this.props.doc.communications[i]["subject"]) + "</span><br>";
+	        var content = "<span style='padding-left:15px;'><strong>Content : </strong>" + String(this.props.doc.communications[i]["content"]) + "</span><br>";
+	        var user = "<span style='padding-left:15px;'><strong>User : </strong>" + String(this.props.doc.communications[i]["user"]) + "<br>";
+	        var newComm = "<div class='row'>" + "<div class='col-sm-12'><p>" + commType + "<pre style='margin-left:15px; margin-right:15px;" + " white-space: pre-wrap; white-space: -moz-pre-wrap;" + " white-space: -pre-wrap; white-space: -o-pre-wrap; word-wrap: break-word;'>" + subject + user + content + "</pre></p></div></div>";
 	        comm = comm + newComm;
 	      }
-	      comm = comm + "</div></div>";
+	      comm = comm + "</div></div><br />";
 	      return comm;
 	    }
 	  }, {
@@ -50080,34 +50085,29 @@
 	                null,
 	                _react2.default.createElement(
 	                  _reactBootstrap.Col,
-	                  { sm: 8 },
+	                  { sm: 9, md: 9, lg: 9 },
 	                  _react2.default.createElement(
 	                    'a',
-	                    { href: url, onClick: this.closeApp },
-	                    doc.doctype,
-	                    ' - ',
-	                    this.formatField(display.titleFieldType, display.titleField),
-	                    ' - ',
-	                    doc.name
+	                    { href: url },
+	                    this.formatField(display.titleFieldType, display.titleField)
 	                  )
 	                ),
 	                _react2.default.createElement(
 	                  _reactBootstrap.Col,
-	                  { sm: 4 },
+	                  { sm: 3, md: 3, lg: 3 },
 	                  _react2.default.createElement(
-	                    _reactBootstrap.Button,
-	                    { onClick: this.log_call },
-	                    'Log Call'
-	                  ),
-	                  _react2.default.createElement(
-	                    'span',
-	                    null,
-	                    ' '
-	                  ),
-	                  _react2.default.createElement(
-	                    _reactBootstrap.Button,
-	                    { onClick: this.close },
-	                    'Cancel'
+	                    _reactBootstrap.ButtonToolbar,
+	                    { bsClass: 'btn-toolbar pull-right' },
+	                    _react2.default.createElement(
+	                      _reactBootstrap.Button,
+	                      { bsSize: 'xsmall', bsStyle: 'primary', onClick: this.log_call },
+	                      'Log Call'
+	                    ),
+	                    _react2.default.createElement(
+	                      _reactBootstrap.Button,
+	                      { bsSize: 'xsmall', onClick: this.close },
+	                      '×'
+	                    )
 	                  )
 	                )
 	              )
@@ -50179,7 +50179,7 @@
 
 
 	// module
-	exports.push([module.id, ".modal-body {\n  color: green;\n  background: transparent !important;\n}\n", ""]);
+	exports.push([module.id, "/*.missingData {\n  border-color: ;\n}\n.missingData > .panel-heading {\n  background-color: ;\n  color: #ffffff;\n}\n.missingData > .panel-body {\n  background-color: rgba(, .05);\n  color: ;\n}\n.stale {\n  border-color: ;\n}\n.stale > .panel-heading {\n  background-color: ;\n  color: #ffffff;\n}\n.stale > .panel-body {\n  background-color: rgba(, .05);\n}\n.pastDueCall {\n  border-color: ;\n}\n.pastDueCall > .panel-heading {\n  background-color: ;\n  color: #ffffff;\n}\n.pastDueCall > .panel-body {\n  background-color: rgba(, .05);\n}\n.imminentTask {\n  border-color: ;\n}\n.imminentTask > .panel-heading {\n  background-color: ;\n  color: #ffffff;\n}\n.imminentTask > .panel-body {\n  background-color: rgba(, .05);\n}\n.imminentContact {\n  border-color: ;\n}\n.imminentContact > .panel-heading {\n  background-color: ;\n  color: #ffffff;\n}\n.imminentContact > .panel-body {\n  background-color: rgba(, .05);\n}\n.statusOK {\n  border-color: ;\n}\n.statusOK > .panel-heading {\n  background-color: ;\n  color: #ffffff;\n}\n.statusOK > .panel-body {\n  background-color: rgba(, .05);\n}*/\n\n\n/*\n::Option 1::\n#52be80 - statusOK\n#cd6155 - pastDueCall\n#eb984e - immenentContact\n#f4d03f - immenentTask\n#5499c7 - missingData\n#aab7b8 - stale\n\n::Option 2::\n#2ecc71 - statusOK\n#c0392b - pastDueCall\n#f39c12 - imminentContact\n#5499c7 - immenentTask\n#34495e - missingData\n#aab7b8 - stale\n\n::Option 3::\n#27ae60 - statusOK\n#cd6155 - pastDueCall\n#f4d03f - imminentContact\n#5dade2 - immenentTask\n#a569bd - missingData\n#2c3e50 - stale\n\n::Option 4::\n#85c1e9 - statusOK\n#d98880 - pastDueCall\n#f8c471 - imminentContact\n#e59866 - immenentTask\n#c39bd3 - missingData\n#cacfd2 - stale\n*/\n", ""]);
 
 	// exports
 
@@ -65037,6 +65037,7 @@
 	        return _react2.default.createElement(SimpleSelect, {
 	          options: mappedOptions,
 	          placeholder: title,
+	          theme: 'material',
 	          onValueChange: function onValueChange(value) {
 	            self.setState(value);
 	            self.props.setFilter(id, value);
@@ -65046,6 +65047,7 @@
 	        return _react2.default.createElement(MultiSelect, {
 	          options: mappedOptions,
 	          placeholder: title,
+	          theme: 'material',
 	          onValuesChange: function onValuesChange(values) {
 	            self.setState(values);
 	            self.props.setFilter(id, values);
