@@ -58,6 +58,8 @@ class Card extends Component {
       ]
       frappe.call({
         method: "frappe.client.get_list",
+        freeze: true,
+        freeze_message: __("TEST"),
         args: {
           "doctype": "Communication",
           "fields": ["Subject", "Content", "Communication_Date", "Communication_Type"],
