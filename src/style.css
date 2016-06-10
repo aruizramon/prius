@@ -11,7 +11,7 @@
   color: #27ae60;
 }
 .modal-statusOK > .modal-content {
-  border-color: #27ae60;
+  border-color: rgba(39, 174, 96, .3);
 }
 .modal-statusOK > .modal-content > .modal-header {
   background-color: rgba(39, 174, 96, .2);
@@ -33,7 +33,7 @@
   color: #D04333;
 }
 .modal-pastDueCall > .modal-content {
-  border-color: #D04333;
+  border-color: rgba(205, 97, 85, .3);
 }
 .modal-pastDueCall > .modal-content > .modal-header {
   background-color: rgba(205, 97, 85, .2);
@@ -55,7 +55,7 @@
   color: #F39C12;
 }
 .modal-imminentContact > .modal-content {
-  border-color: #F39C12;
+  border-color: rgba(243, 156, 18, .2);
 }
 .modal-imminentContact > .modal-content > .modal-header {
   background-color: rgba(243, 156, 18, .2);
@@ -77,7 +77,7 @@
   color: #5dade2;
 }
 .modal-imminentTask > .modal-content {
-  border-color: #5dade2;
+  border-color: rgba(93, 173, 226, .2);
 }
 .modal-imminentTask > .modal-content > .modal-header {
   background-color: rgba(93, 173, 226, .2);
@@ -99,7 +99,7 @@
   color: #AF83C1;
 }
 .modal-missingData > .modal-content {
-  border-color: #AF83C1;
+  border-color: rgba(175, 131, 193, .2);
 }
 .modal-missingData > .modal-content > .modal-header {
   background-color: rgba(175, 131, 193, .2);
@@ -121,7 +121,7 @@
   color: #6F87A0;
 }
 .modal-stale > .modal-content {
-  border-color: #6F87A0;
+  border-color: rgba(44, 62, 80, .2);
 }
 .modal-stale > .modal-content > .modal-header {
   background-color: rgba(44, 62, 80, .2);

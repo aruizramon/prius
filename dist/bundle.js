@@ -49860,8 +49860,6 @@
 	        fieldtype: "Select", options: ["Sent", "Received"], default: "Sent" }, { fieldtype: "Column Break" }, { label: "Next Contact Date", fieldtype: "Date", reqd: "1" }, { fieldtype: "Section Break" }, { label: "Subject", fieldtype: "Data", default: "Call " + new Date() }, { fieldtype: "Section Break" }, { label: "Notes", fieldname: "content", fieldtype: "Small Text", reqd: "1" }];
 	      frappe.call({
 	        method: "frappe.client.get_list",
-	        freeze: true,
-	        freeze_message: __("TEST"),
 	        args: {
 	          "doctype": "Communication",
 	          "fields": ["Subject", "Content", "Communication_Date", "Communication_Type"],
@@ -49979,7 +49977,8 @@
 	      var oticon = {};
 	      oticon["Comment"] = "<i class='octicon octicon-comment-discussion icon-fixed-width'></i> ";
 	      oticon["Communication"] = "<i class='octicon octicon-device-mobile icon-fixed-width'></i> ";
-	      if (label == "Comment" || label == "Communication") {
+	      oticon["Status Update"] = "<i class='octicon octicon-pencil icon-fixed-width'></i> ";
+	      if (label == "Comment" || label == "Communication" || label == "Status Update") {
 	        form = "<p style='max-width:600px; background-color:#ebeff2; margin-bottom:0px;" + " padding-left:15px; padding-top:7px; padding-bottom:7px;'>" + "<span>" + oticon[label] + label + ": " + value + "</span></p>";
 	      } else if (label == "Col") {
 	        form = '<div class="col-sm-6"><p>' + value + '</p></div>';
@@ -49998,7 +49997,11 @@
 	      for (var i = 0; i < this.props.doc.communications.length; i++) {
 	        var type = this.props.doc.communications[i]["communication_type"];
 	        var date = this.formatField('Date', this.props.doc.communications[i]["communication_date"]);
-
+	        if (type == "Comment") {
+	          if (this.props.doc.communications[i]["comment_type"] == "Updated") {
+	            type = "Status Update";
+	          }
+	        }
 	        var commType = this.commMakeForm(type, date);
 	        var subject = this.commMakeForm('Subject', String(this.props.doc.communications[i]["subject"]));
 	        var user = this.commMakeForm('User', String(this.props.doc.communications[i]["user"]));
@@ -50046,22 +50049,34 @@
 	  }, {
 	    key: 'checkStale',
 	    value: function checkStale(doc, display) {
-	      var now = moment();
-	      var staleDate = now.clone().subtract(30, 'days');
-	      var contactDate = moment(display.fieldOne);
+	      var now = moment(moment().format("YYYY-MM-DD"), "YYYY-MM-DD");
+	      var contactDate = moment(doc.contact_date, "YYYY-MM-DD");
+	      var staleDate = moment(moment().format("YYYY-MM-DD"), "YYYY-MM-DD").subtract(30, 'days');
 	      var state = true;
 
-	      if (staleDate == moment.min(staleDate, contactDate)) {
+	      if (staleDate.isBefore(contactDate)) {
 	        state = false;
 	      } else {
-	        for (var i = 0; i < doc.communications.length; i++) {
-	          var type1 = doc.communications[i]["communication_type"];
-	          var type2 = doc.communications[i]["comment_type"];
-	          if (type1 == "Communication" || type2 != "Updated") {
-	            var newDate = moment(doc.communications[i]["communication_date"]);
-	            if (staleDate == moment.min(staleDate, newDate)) {
-	              state = false;
-	            }
+	        state = this.checkCommunications(doc, display);
+	      }
+	      return state;
+	    }
+	    //// checkCommunications(doc, display)
+	    // checks the dates of the communication history
+	    // returns true if stale and false if within 30 days
+
+	  }, {
+	    key: 'checkCommunications',
+	    value: function checkCommunications(doc, display) {
+	      var state = true;
+	      var staleDate = moment(moment().format("YYYY-MM-DD"), "YYYY-MM-DD").subtract(30, 'days');
+	      for (var i = 0; i < doc.communications.length; i++) {
+	        var type1 = doc.communications[i]["communication_type"];
+	        var type2 = doc.communications[i]["comment_type"];
+	        if (type1 == "Communication" || type2 != "Updated") {
+	          var newDate = moment(doc.communications[i]["communication_date"], "YYYY-MM-DD");
+	          if (staleDate.isBefore(newDate)) {
+	            state = false;
 	          }
 	        }
 	      }
@@ -50081,10 +50096,9 @@
 	          }
 	        }
 	      }
-	      var now = moment();
-	      var contact = moment(display.fieldOne);
-	      var nextWeek = now.clone().add(7, 'days');
-	      var lastWeek = contact.clone().subtract(7, 'days');
+	      var now = moment(moment().format("YYYY-MM-DD"), "YYYY-MM-DD");
+	      var contact = moment(doc.contact_date, "YYYY-MM-DD");
+	      var nextWeek = moment(moment().format("YYYY-MM-DD"), "YYYY-MM-DD").add(7, 'days');
 	      var staleDate = this.checkStale(doc, display);
 	      // if a card has a nextContactBy or last communication
 	      // date > 30 days less than the current
@@ -50092,11 +50106,11 @@
 	        return "stale";
 	      }
 	      // if a card has a nextContactBy within the next week
-	      else if (lastWeek <= now && now < contact) {
+	      else if (now.isSameOrBefore(contact) && contact.isSameOrBefore(nextWeek)) {
 	          return "imminentContact";
 	        }
 	        // if a card has a nextContactBy already passed due but is not stale
-	        else if (now <= contact) {
+	        else if (now.isAfter(contact)) {
 	            return "pastDueCall";
 	          }
 	      // all info is correct and no dates are due/past
@@ -50124,6 +50138,7 @@
 	    _this.getInfo = _this.getInfo.bind(_this);
 	    _this.getComms = _this.getComms.bind(_this);
 	    _this.commMakeForm = _this.commMakeForm.bind(_this);
+	    _this.checkCommunications = _this.checkCommunications.bind(_this);
 	    return _this;
 	  }
 
@@ -50268,7 +50283,7 @@
 
 
 	// module
-	exports.push([module.id, "/* ++++++++++++++++++ STATUSOK ++++++++++++++++++ */\n.panel-statusOK {\n  border-color: #52be80;\n}\n.panel-statusOK > .panel-heading {\n  background-color: #52be80;\n  color: #ffffff;\n}\n.panel-statusOK > .panel-body {\n  background-color: rgba(39, 174, 96, .05);\n  color: #27ae60;\n}\n.modal-statusOK > .modal-content {\n  border-color: #27ae60;\n}\n.modal-statusOK > .modal-content > .modal-header {\n  background-color: rgba(39, 174, 96, .2);\n}\n.modal-statusOK > .modal-content > .modal-body\n                > .panel > .panel-heading {\n  background-color: rgba(39, 174, 96, .2);\n}\n/* ++++++++++++++++++ PASTDUECALL ++++++++++++++++++ */\n.panel-pastDueCall {\n  border-color: #D04333;\n}\n.panel-pastDueCall > .panel-heading {\n  background-color: #D04333;\n  color: #ffffff;\n}\n.panel-pastDueCall > .panel-body {\n  background-color: rgba(205, 97, 85, .05);\n  color: #D04333;\n}\n.modal-pastDueCall > .modal-content {\n  border-color: #D04333;\n}\n.modal-pastDueCall > .modal-content > .modal-header {\n  background-color: rgba(205, 97, 85, .2);\n}\n.modal-pastDueCall > .modal-content > .modal-body\n                   > .panel > .panel-heading {\n  background-color: rgba(205, 97, 85, .2);\n}\n/* ++++++++++++++++++ IMMINENTCONTACT ++++++++++++++++++ */\n.panel-imminentContact {\n  border-color: #F39C12;\n}\n.panel-imminentContact > .panel-heading {\n  background-color: #F39C12;\n  color: #ffffff;\n}\n.panel-imminentContact > .panel-body {\n  background-color: rgba(243, 156, 18, .05);\n  color: #F39C12;\n}\n.modal-imminentContact > .modal-content {\n  border-color: #F39C12;\n}\n.modal-imminentContact > .modal-content > .modal-header {\n  background-color: rgba(243, 156, 18, .2);\n}\n.modal-imminentContact > .modal-content > .modal-body\n                       > .panel > .panel-heading {\n  background-color: rgba(243, 156, 18, .2);\n}\n/* ++++++++++++++++++ IMMINENTTASK ++++++++++++++++++ */\n.panel-imminentTask {\n  border-color: #5dade2;\n}\n.panel-imminentTask > .panel-heading {\n  background-color: #5dade2;\n  color: #ffffff;\n}\n.panel-imminentTask > .panel-body {\n  background-color: rgba(93, 173, 226, .05);\n  color: #5dade2;\n}\n.modal-imminentTask > .modal-content {\n  border-color: #5dade2;\n}\n.modal-imminentTask > .modal-content > .modal-header {\n  background-color: rgba(93, 173, 226, .2);\n}\n.modal-imminentTask > .modal-content > .modal-body\n                    > .panel > .panel-heading {\n  background-color: rgba(93, 173, 226, .2);\n}\n/* ++++++++++++++++++ MISSINGDATA ++++++++++++++++++ */\n.panel-missingData {\n  border-color: #AF83C1;\n}\n.panel-missingData > .panel-heading {\n  background-color: #AF83C1;\n  color: #ffffff;\n}\n.panel-missingData > .panel-body {\n  background-color: rgba(175, 131, 193, .05);\n  color: #AF83C1;\n}\n.modal-missingData > .modal-content {\n  border-color: #AF83C1;\n}\n.modal-missingData > .modal-content > .modal-header {\n  background-color: rgba(175, 131, 193, .2);\n}\n.modal-missingData > .modal-content > .modal-body\n                   > .panel > .panel-heading {\n  background-color: rgba(175, 131, 193, .2);\n}\n/* ++++++++++++++++++ STALE ++++++++++++++++++ */\n.panel-stale {\n  border-color: #6F87A0;\n}\n.panel-stale > .panel-heading {\n  background-color: #6F87A0;\n  color: #ffffff;\n}\n.panel-stale > .panel-body {\n  background-color: rgba(44, 62, 80, .05);\n  color: #6F87A0;\n}\n.modal-stale > .modal-content {\n  border-color: #6F87A0;\n}\n.modal-stale > .modal-content > .modal-header {\n  background-color: rgba(44, 62, 80, .2);\n}\n.modal-stale > .modal-content > .modal-body\n             > .panel > .panel-heading {\n  background-color: rgba(44, 62, 80, .2);\n}\n/*\n::Option 3::  << MANDA\n#27ae60 - statusOK - 39, 174, 96\n#cd6155 - pastDueCall - 205, 97, 85\n#f4d03f - imminentContact - 244, 208, 63\n#5dade2 - immenentTask - 93, 173, 226\n#a569bd - missingData - 165, 105, 189\n#2c3e50 - stale - 44, 62, 80\n\n::Option 1::\n#52be80 - statusOK - 82, 190, 128\n#cd6155 - pastDueCall - 205, 97, 85\n#eb984e - immenentContact - 235, 152, 78\n#f4d03f - immenentTask - 244, 208, 63\n#5499c7 - missingData - 84, 153, 199\n#aab7b8 - stale - 170, 183, 184\n\n::Option 2::\n#2ecc71 - statusOK\n#c0392b - pastDueCall\n#f39c12 - imminentContact\n#5499c7 - immenentTask\n#34495e - missingData\n#aab7b8 - stale\n\n::Option 4::\n#85c1e9 - statusOK\n#d98880 - pastDueCall\n#f8c471 - imminentContact\n#e59866 - immenentTask\n#c39bd3 - missingData\n#cacfd2 - stale\n*/\n", ""]);
+	exports.push([module.id, "/* ++++++++++++++++++ STATUSOK ++++++++++++++++++ */\n.panel-statusOK {\n  border-color: #52be80;\n}\n.panel-statusOK > .panel-heading {\n  background-color: #52be80;\n  color: #ffffff;\n}\n.panel-statusOK > .panel-body {\n  background-color: rgba(39, 174, 96, .05);\n  color: #27ae60;\n}\n.modal-statusOK > .modal-content {\n  border-color: rgba(39, 174, 96, .3);\n}\n.modal-statusOK > .modal-content > .modal-header {\n  background-color: rgba(39, 174, 96, .2);\n}\n.modal-statusOK > .modal-content > .modal-body\n                > .panel > .panel-heading {\n  background-color: rgba(39, 174, 96, .2);\n}\n/* ++++++++++++++++++ PASTDUECALL ++++++++++++++++++ */\n.panel-pastDueCall {\n  border-color: #D04333;\n}\n.panel-pastDueCall > .panel-heading {\n  background-color: #D04333;\n  color: #ffffff;\n}\n.panel-pastDueCall > .panel-body {\n  background-color: rgba(205, 97, 85, .05);\n  color: #D04333;\n}\n.modal-pastDueCall > .modal-content {\n  border-color: rgba(205, 97, 85, .3);\n}\n.modal-pastDueCall > .modal-content > .modal-header {\n  background-color: rgba(205, 97, 85, .2);\n}\n.modal-pastDueCall > .modal-content > .modal-body\n                   > .panel > .panel-heading {\n  background-color: rgba(205, 97, 85, .2);\n}\n/* ++++++++++++++++++ IMMINENTCONTACT ++++++++++++++++++ */\n.panel-imminentContact {\n  border-color: #F39C12;\n}\n.panel-imminentContact > .panel-heading {\n  background-color: #F39C12;\n  color: #ffffff;\n}\n.panel-imminentContact > .panel-body {\n  background-color: rgba(243, 156, 18, .05);\n  color: #F39C12;\n}\n.modal-imminentContact > .modal-content {\n  border-color: rgba(243, 156, 18, .2);\n}\n.modal-imminentContact > .modal-content > .modal-header {\n  background-color: rgba(243, 156, 18, .2);\n}\n.modal-imminentContact > .modal-content > .modal-body\n                       > .panel > .panel-heading {\n  background-color: rgba(243, 156, 18, .2);\n}\n/* ++++++++++++++++++ IMMINENTTASK ++++++++++++++++++ */\n.panel-imminentTask {\n  border-color: #5dade2;\n}\n.panel-imminentTask > .panel-heading {\n  background-color: #5dade2;\n  color: #ffffff;\n}\n.panel-imminentTask > .panel-body {\n  background-color: rgba(93, 173, 226, .05);\n  color: #5dade2;\n}\n.modal-imminentTask > .modal-content {\n  border-color: rgba(93, 173, 226, .2);\n}\n.modal-imminentTask > .modal-content > .modal-header {\n  background-color: rgba(93, 173, 226, .2);\n}\n.modal-imminentTask > .modal-content > .modal-body\n                    > .panel > .panel-heading {\n  background-color: rgba(93, 173, 226, .2);\n}\n/* ++++++++++++++++++ MISSINGDATA ++++++++++++++++++ */\n.panel-missingData {\n  border-color: #AF83C1;\n}\n.panel-missingData > .panel-heading {\n  background-color: #AF83C1;\n  color: #ffffff;\n}\n.panel-missingData > .panel-body {\n  background-color: rgba(175, 131, 193, .05);\n  color: #AF83C1;\n}\n.modal-missingData > .modal-content {\n  border-color: rgba(175, 131, 193, .2);\n}\n.modal-missingData > .modal-content > .modal-header {\n  background-color: rgba(175, 131, 193, .2);\n}\n.modal-missingData > .modal-content > .modal-body\n                   > .panel > .panel-heading {\n  background-color: rgba(175, 131, 193, .2);\n}\n/* ++++++++++++++++++ STALE ++++++++++++++++++ */\n.panel-stale {\n  border-color: #6F87A0;\n}\n.panel-stale > .panel-heading {\n  background-color: #6F87A0;\n  color: #ffffff;\n}\n.panel-stale > .panel-body {\n  background-color: rgba(44, 62, 80, .05);\n  color: #6F87A0;\n}\n.modal-stale > .modal-content {\n  border-color: rgba(44, 62, 80, .2);\n}\n.modal-stale > .modal-content > .modal-header {\n  background-color: rgba(44, 62, 80, .2);\n}\n.modal-stale > .modal-content > .modal-body\n             > .panel > .panel-heading {\n  background-color: rgba(44, 62, 80, .2);\n}\n/*\n::Option 3::  << MANDA\n#27ae60 - statusOK - 39, 174, 96\n#cd6155 - pastDueCall - 205, 97, 85\n#f4d03f - imminentContact - 244, 208, 63\n#5dade2 - immenentTask - 93, 173, 226\n#a569bd - missingData - 165, 105, 189\n#2c3e50 - stale - 44, 62, 80\n\n::Option 1::\n#52be80 - statusOK - 82, 190, 128\n#cd6155 - pastDueCall - 205, 97, 85\n#eb984e - immenentContact - 235, 152, 78\n#f4d03f - immenentTask - 244, 208, 63\n#5499c7 - missingData - 84, 153, 199\n#aab7b8 - stale - 170, 183, 184\n\n::Option 2::\n#2ecc71 - statusOK\n#c0392b - pastDueCall\n#f39c12 - imminentContact\n#5499c7 - immenentTask\n#34495e - missingData\n#aab7b8 - stale\n\n::Option 4::\n#85c1e9 - statusOK\n#d98880 - pastDueCall\n#f8c471 - imminentContact\n#e59866 - immenentTask\n#c39bd3 - missingData\n#cacfd2 - stale\n*/\n", ""]);
 
 	// exports
 

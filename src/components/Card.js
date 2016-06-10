@@ -58,8 +58,6 @@ class Card extends Component {
       ]
       frappe.call({
         method: "frappe.client.get_list",
-        freeze: true,
-        freeze_message: __("TEST"),
         args: {
           "doctype": "Communication",
           "fields": ["Subject", "Content", "Communication_Date", "Communication_Type"],
@@ -180,8 +178,9 @@ class Card extends Component {
     var form = ''
     var oticon = {}
     oticon["Comment"] = "<i class='octicon octicon-comment-discussion icon-fixed-width'></i> ";
-    oticon["Communication"] = "<i class='octicon octicon-device-mobile icon-fixed-width'></i> "
-    if (label == "Comment" || label == "Communication") {
+    oticon["Communication"] = "<i class='octicon octicon-device-mobile icon-fixed-width'></i> ";
+    oticon["Status Update"] = "<i class='octicon octicon-pencil icon-fixed-width'></i> ";
+    if (label == "Comment" || label == "Communication" || label == "Status Update") {
       form = "<p style='max-width:600px; background-color:#ebeff2; margin-bottom:0px;"
                 + " padding-left:15px; padding-top:7px; padding-bottom:7px;'>"
                 + "<span>" + oticon[label] + label + ": " + value + "</span></p>"
@@ -209,7 +208,11 @@ class Card extends Component {
     for (var i = 0; i < this.props.doc.communications.length; i++) {
       var type = this.props.doc.communications[i]["communication_type"]
       var date = this.formatField('Date', this.props.doc.communications[i]["communication_date"])
-
+      if (type == "Comment") {
+        if (this.props.doc.communications[i]["comment_type"] == "Updated") {
+          type = "Status Update"
+        }
+      }
       var commType = this.commMakeForm(type, date)
       var subject = this.commMakeForm('Subject', String(this.props.doc.communications[i]["subject"]))
       var user = this.commMakeForm('User', String(this.props.doc.communications[i]["user"]))
@@ -256,22 +259,31 @@ class Card extends Component {
   // - next contact date is < 30 days ago
   // otherwise the lead is stale and returns true
   checkStale(doc, display) {
-    var now = moment();
-    var staleDate = now.clone().subtract(30, 'days');
-    var contactDate = moment(display.fieldOne);
-    var state = true
+    var now = moment(moment().format("YYYY-MM-DD"), "YYYY-MM-DD")
+    var contactDate = moment(doc.contact_date, "YYYY-MM-DD");
+    var staleDate = moment(moment().format("YYYY-MM-DD"), "YYYY-MM-DD").subtract(30, 'days');
+    var state = true;
 
-    if (staleDate == moment.min(staleDate, contactDate)) {
+    if (staleDate.isBefore(contactDate)) {
       state = false;
     } else {
-      for (var i = 0; i < doc.communications.length; i++) {
-        var type1 = doc.communications[i]["communication_type"];
-        var type2 = doc.communications[i]["comment_type"]
-        if (type1 == "Communication" || type2 != "Updated") {
-          var newDate = moment(doc.communications[i]["communication_date"])
-          if (staleDate == moment.min(staleDate, newDate)) {
-            state = false
-          }
+      state = this.checkCommunications(doc, display);
+    }
+    return state
+  }
+  //// checkCommunications(doc, display)
+  // checks the dates of the communication history
+  // returns true if stale and false if within 30 days
+  checkCommunications(doc, display) {
+    var state = true;
+    var staleDate = moment(moment().format("YYYY-MM-DD"), "YYYY-MM-DD").subtract(30, 'days');
+    for (var i = 0; i < doc.communications.length; i++) {
+      var type1 = doc.communications[i]["communication_type"];
+      var type2 = doc.communications[i]["comment_type"];
+      if (type1 == "Communication" || type2 != "Updated") {
+        var newDate = moment(doc.communications[i]["communication_date"], "YYYY-MM-DD");
+        if (staleDate.isBefore(newDate)) {
+          state = false;
         }
       }
     }
@@ -288,10 +300,9 @@ class Card extends Component {
         }
       }
     }
-    var now = moment()
-    var contact = moment(display.fieldOne);
-    var nextWeek = now.clone().add(7, 'days');
-    var lastWeek = contact.clone().subtract(7, 'days');
+    var now = moment(moment().format("YYYY-MM-DD"), "YYYY-MM-DD");
+    var contact = moment(doc.contact_date, "YYYY-MM-DD");
+    var nextWeek = moment(moment().format("YYYY-MM-DD"), "YYYY-MM-DD").add(7, 'days');
     var staleDate = this.checkStale(doc, display);
     // if a card has a nextContactBy or last communication
     // date > 30 days less than the current
@@ -299,11 +310,11 @@ class Card extends Component {
       return "stale"
     }
     // if a card has a nextContactBy within the next week
-    else if (lastWeek <= now && now < contact) {
+    else if (now.isSameOrBefore(contact) && contact.isSameOrBefore(nextWeek)) {
       return "imminentContact"
     }
     // if a card has a nextContactBy already passed due but is not stale
-    else if (now <= contact){
+    else if (now.isAfter(contact)){
       return "pastDueCall"
     }
     // all info is correct and no dates are due/past
@@ -326,6 +337,7 @@ class Card extends Component {
     this.getInfo = this.getInfo.bind(this);
     this.getComms = this.getComms.bind(this);
     this.commMakeForm = this.commMakeForm.bind(this);
+    this.checkCommunications = this.checkCommunications.bind(this);
   }
 
   render() {
