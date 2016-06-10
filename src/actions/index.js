@@ -2,6 +2,27 @@ export const ADD_LIST = 'ADD_LIST';
 export const ADD_CARD = 'ADD_CARD';
 export const LOAD_BOARD = 'LOAD_BOARD';
 export const SET_FILTER = 'SET_FILTER';
+export const UPDATE_CARD = 'UPDATE_CARD';
+export const DELETE_CARD = 'DELETE_CARD';
+
+
+export const updateCard = (card) => {
+  var action = null;
+  if (card.card.delete != null) {
+    console.log('delete');
+    action = {
+      type: DELETE_CARD,
+      card: card,
+    };
+  } else {
+    action = {
+     type: UPDATE_CARD,
+     card: card,
+   };
+  };
+  return action;
+};
+
 
 let nextCardId = 0;
 export const addCard = (title, description, parentList = 0) => {

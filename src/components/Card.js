@@ -24,6 +24,7 @@ const cardSource = {
 
 class Card extends Component {
   static propTypes = {
+    key: PropTypes.string,
     doc: PropTypes.object,
     display: PropTypes.object,
     connectDragSource: PropTypes.func.isRequired,
@@ -103,16 +104,26 @@ class Card extends Component {
               data.doctype = "Communication";
               data.reference_doctype = card.props.doc.doctype;
               data.reference_name = card.props.doc.name;
-              card.props.doc.contact_date = data.next_contact_date;
               frappe.call({
                 method: "frappe.client.insert",
                 args: {
                   "doc": data
+                },
+                callback: function(r) {
+                  frappe.call({
+                    method: "frappe.client.set_value",
+                    args: {
+                      "doctype": card.props.doc.doctype,
+                      "name": card.props.doc.name,
+                      "fieldname": "contact_date",
+                      "value": data.next_contact_date
+                    }
+                  })
                 }
               })
             })
-        }
-      })
+          }
+        });
   }
   closeApp() {
     this.setState({ showModal: false});
@@ -126,9 +137,11 @@ class Card extends Component {
     var url = this.props.url;
     var cardID = ".modal-body[id*='" + String(url) + "']";
     var info = this.getInfo();
-    var comm = this.getComms();
     $(".modal-content").find(cardID).append(info);
-    $(".modal-content").find(cardID).append(comm);
+    if (this.props.doc.communications != null){
+      var comm = this.getComms();
+      $(".modal-content").find(cardID).append(comm);
+    }
   }
   // moved html to here from getInfo to make it easier to change styling
   makeField(field, label) {
@@ -234,8 +247,8 @@ class Card extends Component {
     }
     return "default"
   }
-  constructor(props) {
-    super(props);
+  constructor(props, context) {
+    super(props, context);
     this.open = this.open.bind(this);
     this.close = this.close.bind(this);
     this.closeApp = this.closeApp.bind(this);
@@ -252,12 +265,12 @@ class Card extends Component {
   }
 
   render() {
-    const { doc, url, display } = this.props;
+    const { doc, url, display, key } = this.props;
     const { connectDragSource, isDragging } = this.props;
     const { showModal } = this.state;
 
     return (
-      <div className="kanban-card">
+      <div className="kanban-card" id={key}>
         <Panel bsStyle={this.getStyle(doc, display)}
                header={display.titleField}
                onClick={this.open}>
