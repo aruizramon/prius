@@ -37,6 +37,8 @@ class Card extends Component {
   open() {
     this.setState({ showModal: true });
   }
+  //// log_call()
+  // calls frappe.prompt to log a call for the given lead
   log_call() {
       this.setState({ showModal: false });
       var card = this
@@ -122,6 +124,8 @@ class Card extends Component {
   getForm(form) {
     return { __html: form.form}
   }
+  //// addValue()
+  // adds the field info and the communication history to a card onEnter event
   addValue() {
     var url = this.props.url;
     var cardID = ".modal-body[id*='" + String(url) + "']";
@@ -130,7 +134,8 @@ class Card extends Component {
     $(".modal-content").find(cardID).append(info);
     $(".modal-content").find(cardID).append(comm);
   }
-  // moved html to here from getInfo to make it easier to change styling
+  //// makeField()
+  // returns a html formatted form-group with the given label and field
   makeField(field, label) {
     return ('<div class="form-group" style="padding-left:15px;"><label class="control-label">'
       + label
@@ -138,6 +143,8 @@ class Card extends Component {
       + field
       + '</div><br />')
   }
+  //// getInfo()
+  // returns the html formatted lead info
   getInfo() {
     var subtitleOne = this.makeField(this.formatField(
         this.props.display.subOneType, this.props.display.subOne),
@@ -158,13 +165,39 @@ class Card extends Component {
         this.props.display.fieldFourType, this.props.display.fieldFour),
         this.props.display.fieldFourLabel)
     var col1 = '<div class="col-sm-6"><p>'
-       + subtitleOne + fieldOne + fieldTwo
-      + '</div>'
+      + subtitleOne + fieldOne + fieldTwo
+      + '</p></div>'
     var col2 = '<div class="col-sm-6"><p>'
       + subtitleTwo + fieldThree + fieldFour
-      + '</div>'
-    return('<div class="row">' + col1 + col2 + '</div></div><br />')
+      + '</p></div>'
+    return('<div class="row">' + col1 + col2 + '</div><br />')
   }
+  //// commMakeFOrm(label, value)
+  // returns an html formatted communication for the history
+  commMakeForm(label, value) {
+    var form = ''
+    var oticon = {}
+    oticon["Comment"] = "<i class='octicon octicon-comment-discussion icon-fixed-width'></i> ";
+    oticon["Communication"] = "<i class='octicon octicon-device-mobile icon-fixed-width'></i> "
+    if (label == "Comment" || label == "Communication") {
+      form = "<p style='max-width:600px; background-color:#ebeff2; margin-bottom:0px;"
+                + " padding-left:15px; padding-top:7px; padding-bottom:7px;'>"
+                + "<span>" + oticon[label] + label + ": " + value + "</span></p>"
+    } else if (label == "Col") {
+      form = '<div class="col-sm-6"><p>'
+                + value
+                + '</p></div>'
+    } else {
+      form = '<div class="form-group"><label class="control-label">'
+                + label
+                + '</label><br />'
+                + value
+                + '</div>'
+    }
+    return form
+  }
+  //// getComms()
+  // returns the html formatted lead communication history
   getComms() {
     var comm = "<div class='panel panel-default' style='margin:-15px;'>"
       + "<div class='panel-heading' data-toggle='collapse' href='#collapse1'>"
@@ -174,33 +207,33 @@ class Card extends Component {
     for (var i = 0; i < this.props.doc.communications.length; i++) {
       var type = this.props.doc.communications[i]["communication_type"]
       var date = this.formatField('Date', this.props.doc.communications[i]["communication_date"])
-      if(type == "Comment") {
-        var commType = "<span style='padding-left:15px;'><strong>"
-                        + "<i class='octicon octicon-comment-discussion icon-fixed-width'></i> "
-                        + type + "</strong>: " + date + "</span><br>"
-      } else if(type == "Communication") {
-        var commType = "<span style='padding-left:15px;'><strong>"
-                        + "<i class='octicon octicon-device-mobile icon-fixed-width'></i> "
-                        + type + "</strong>: " + date + "</span><br>"
+
+      var commType = this.commMakeForm(type, date)
+      var subject = this.commMakeForm('Subject', String(this.props.doc.communications[i]["subject"]))
+      var user = this.commMakeForm('User', String(this.props.doc.communications[i]["user"]))
+      var content = ''
+      // if content is empty, dont render field
+      if (this.props.doc.communications[i]["content"] != null) {
+        content = this.commMakeForm('Content', String(this.props.doc.communications[i]["content"]))
       }
-      var subject = "<span style='padding-left:15px;'><strong>Subject : </strong>"
-                     + String(this.props.doc.communications[i]["subject"]) + "</span><br>"
-      var content = "<span style='padding-left:15px;'><strong>Content : </strong>"
-                     + String(this.props.doc.communications[i]["content"]) + "</span><br>"
-      var user = "<span style='padding-left:15px;'><strong>User : </strong>"
-                  + String(this.props.doc.communications[i]["user"]) + "<br>"
+
+      var col1 = this.commMakeForm('Col', subject)
+      var col2 = this.commMakeForm('Col', user)
+      var row1 = '<div class="row" style="margin-top:5px; margin-left:3px; margin-right:17px; border-right:2px; border-color:#ebeff2;">'
+                  + col1 + col2 + '</div>'
+      var row2 = '<div class="row" style="margin-top:-15px; margin-left:3px; margin-right:17px; border-right:2px; border-color:#ebeff2;">'
+                  + '<div class="col-sm-12"><p>' + content + '</p></div></div>'
       var newComm = "<div class='row'>"
                      + "<div class='col-sm-12'><p>"
-                     + commType
-                     + "<pre style='margin-left:15px; margin-right:15px;"
-                     + " white-space: pre-wrap; white-space: -moz-pre-wrap;"
-                     + " white-space: -pre-wrap; white-space: -o-pre-wrap; word-wrap: break-word;'>"
-                     + subject + user + content + "</pre></p></div></div>"
+                     + commType + "<div style='margin-left:14px; margin-top:0px; border-style: solid; border-width: 0px 0px 0px 3px; border-color:#ebeff2;'>"
+                     + row1 + row2 +"</div></p></div></div>"
       comm = comm + newComm
     }
-    comm = comm + "</div></div><br />"
+    comm = comm + "</div></div>"
     return comm
   }
+  //// formatField(fieldtype, field)
+  // formats and returns given field based on type
   formatField(fieldtype, field) {
     if (fieldtype == 'Currency') {
       field = numeral(field).format('$0,0')
@@ -215,24 +248,64 @@ class Card extends Component {
     }
     return field
   }
+  //// checkStale(doc, display)
+  // returns false if
+  // - last communication is < 30 days ago
+  // - next contact date is < 30 days ago
+  // otherwise the lead is stale and returns true
+  checkStale(doc, display) {
+    var now = moment();
+    var staleDate = now.clone().subtract(30, 'days');
+    var contactDate = moment(display.fieldOne);
+    var state = true
+
+    if (staleDate == moment.min(staleDate, contactDate)) {
+      state = false;
+    } else {
+      for (var i = 0; i < doc.communications.length; i++) {
+        var type1 = doc.communications[i]["communication_type"];
+        var type2 = doc.communications[i]["comment_type"]
+        if (type1 == "Communication" || type2 != "Updated") {
+          var newDate = moment(doc.communications[i]["communication_date"])
+          if (staleDate == moment.min(staleDate, newDate)) {
+            state = false
+          }
+        }
+      }
+    }
+    return state
+  }
+  //// getStyle(doc, display)
+  // validates and returns the state of the lead
   getStyle(doc, display) {
     // if a card field is null, danger
     for (var prop in display) {
       if (display.hasOwnProperty(prop)) {
         if (display[prop] == null) {
-          return "danger"
+          return "missingData"
         }
       }
     }
-    var now = moment();
-    var contact = moment(doc.contact_date);
+    var now = moment()
+    var contact = moment(display.fieldOne);
     var nextWeek = now.clone().add(7, 'days');
-    if (contact < now) {
-      return "warning"
-    } else if (now <= contact && contact <= nextWeek){
-      return "info"
+    var lastWeek = contact.clone().subtract(7, 'days');
+    var staleDate = this.checkStale(doc, display);
+    // if a card has a nextContactBy or last communication
+    // date > 30 days less than the current
+    if (staleDate) {
+      return "stale"
     }
-    return "default"
+    // if a card has a nextContactBy within the next week
+    else if (lastWeek <= now && now < contact) {
+      return "imminentContact"
+    }
+    // if a card has a nextContactBy already passed due but is not stale
+    else if (now <= contact){
+      return "pastDueCall"
+    }
+    // all info is correct and no dates are due/past
+    return "statusOK"
   }
   constructor(props) {
     super(props);
@@ -242,6 +315,7 @@ class Card extends Component {
     this.getForm = this.getForm.bind(this);
     this.formatField = this.formatField.bind(this);
     this.getStyle = this.getStyle.bind(this);
+    this.checkStale = this.checkStale.bind(this);
     this.state = {
       showModal: false,
     }
@@ -249,6 +323,7 @@ class Card extends Component {
     this.addValue = this.addValue.bind(this);
     this.getInfo = this.getInfo.bind(this);
     this.getComms = this.getComms.bind(this);
+    this.commMakeForm = this.commMakeForm.bind(this);
   }
 
   render() {
@@ -261,19 +336,19 @@ class Card extends Component {
         <Panel bsStyle={this.getStyle(doc, display)}
                header={display.titleField}
                onClick={this.open}>
-            <small>
-              {display.subOneLabel} - {this.formatField(display.subOneType, display.subOne)}
-              <br />
-              {display.subTwoLabel} - {this.formatField(display.subTwoType, display.subTwo)}
-            </small>
+          <small>
+            {display.subOneLabel} - {this.formatField(display.subOneType, display.subOne)}
+            <br />
+            {display.subTwoLabel} - {this.formatField(display.subTwoType, display.subTwo)}
+          </small>
         </Panel>
 
-        <Modal show={this.state.showModal} onEnter={this.addValue} onHide={this.close}>
+        <Modal bsStyle={this.getStyle(doc, display)} show={this.state.showModal} onEnter={this.addValue} onHide={this.close}>
           <Modal.Header>
             <Modal.Title>
               <Row>
                 <Col sm={9} md={9} lg={9}>
-                    <a href={url}>{this.formatField(display.titleFieldType, display.titleField)}</a>
+                    <a href={url} target={url}>{this.formatField(display.titleFieldType, display.titleField)}</a>
                 </Col>
                 <Col sm={3} md={3} lg={3}>
                   <ButtonToolbar bsClass="btn-toolbar pull-right">
@@ -288,7 +363,7 @@ class Card extends Component {
           </Modal.Body>
         </Modal>
       </div>
-      );
+    );
   }
 }
 
