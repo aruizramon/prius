@@ -50012,7 +50012,14 @@
 	  }, {
 	    key: 'makeField',
 	    value: function makeField(field, label) {
-	      return '<div class="form-group" style="padding-left:15px;"><label class="control-label">' + label + '</label><br />' + field + '</div><br />';
+	      if (field == null) {
+	        var field_html = '<div class="form-group has-error" style="padding-left:15px;"><label class="control-label">' + label + '</label><br />' + "<strong>No Information</strong>" + '</div><br />';
+	      } else if (this.getStyle(this.props.doc, this.props.display) == "pastDueCall" && label == "Next Contact Date") {
+	        var field_html = '<div class="form-group has-error" style="padding-left:15px;"><label class="control-label">' + label + '</label><br />' + "<strong>" + field + "</strong>" + '</div><br />';
+	      } else {
+	        var field_html = '<div class="form-group" style="padding-left:15px;"><label class="control-label">' + label + '</label><br />' + field + '</div><br />';
+	      }
+	      return field_html;
 	    }
 	    //// getInfo()
 	    // returns the html formatted lead info
