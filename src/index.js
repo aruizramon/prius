@@ -11,5 +11,7 @@ window.loadKanban = function(initialState) {
 };
 
 window.updateCard = function(card) {
-  RenderedApp.updateCard({ card })
+  if (RenderedApp != null){
+    RenderedApp.updateCard({ card });
+  }
 };

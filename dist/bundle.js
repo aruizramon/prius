@@ -63,8 +63,16 @@
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-	window.load_my_kanban = function (initialState) {
-	  (0, _reactDom.render)(_react2.default.createElement(_App.App, { initialState: initialState }), document.getElementById('body_div'));
+	var RenderedApp = null;
+
+	window.loadKanban = function (initialState) {
+	  RenderedApp = (0, _reactDom.render)(_react2.default.createElement(_App.App, { initialState: initialState }), document.getElementById('body_div'));
+	};
+
+	window.updateCard = function (card) {
+	  if (RenderedApp != null) {
+	    RenderedApp.updateCard({ card: card });
+	  }
 	};
 
 /***/ },
@@ -19702,6 +19710,8 @@
 
 	var _configureStore2 = _interopRequireDefault(_configureStore);
 
+	var _actions = __webpack_require__(662);
+
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -19715,13 +19725,21 @@
 	var App = exports.App = function (_Component) {
 	  _inherits(App, _Component);
 
-	  function App() {
+	  function App(props) {
 	    _classCallCheck(this, App);
 
-	    return _possibleConstructorReturn(this, Object.getPrototypeOf(App).apply(this, arguments));
+	    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(App).call(this, props));
+
+	    _this.updateCard = _this.updateCard.bind(_this);
+	    return _this;
 	  }
 
 	  _createClass(App, [{
+	    key: 'updateCard',
+	    value: function updateCard(card) {
+	      this.refs['board'].store.dispatch((0, _actions.updateCard)(card));
+	    }
+	  }, {
 	    key: 'render',
 	    value: function render() {
 	      var initialState = this.props.initialState;
@@ -19733,7 +19751,7 @@
 	        _react2.default.createElement(
 	          'div',
 	          null,
-	          _react2.default.createElement(_Board2.default, null)
+	          _react2.default.createElement(_Board2.default, { ref: 'board' })
 	        )
 	      );
 	    }
@@ -21457,11 +21475,17 @@
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-	var _dec, _class;
+	var _dec, _dec2, _class;
 
 	var _react = __webpack_require__(2);
 
 	var _react2 = _interopRequireDefault(_react);
+
+	var _redux = __webpack_require__(168);
+
+	var _reactRedux = __webpack_require__(161);
+
+	var _reactDom = __webpack_require__(159);
 
 	var _reactBootstrap = __webpack_require__(188);
 
@@ -21483,6 +21507,8 @@
 
 	var _Lists2 = _interopRequireDefault(_Lists);
 
+	var _actions = __webpack_require__(662);
+
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -21491,7 +21517,11 @@
 
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-	var Board = (_dec = (0, _reactDnd.DragDropContext)(_reactDndHtml5Backend2.default), _dec(_class = function (_Component) {
+	var mapDispatchToProps = function mapDispatchToProps(dispatch) {
+	  return (0, _redux.bindActionCreators)({ updateCard: _actions.updateCard }, dispatch);
+	};
+
+	var Board = (_dec = (0, _reactRedux.connect)(null, mapDispatchToProps), _dec2 = (0, _reactDnd.DragDropContext)(_reactDndHtml5Backend2.default), _dec(_class = _dec2(_class = function (_Component) {
 	  _inherits(Board, _Component);
 
 	  function Board() {
@@ -21514,7 +21544,7 @@
 	  }]);
 
 	  return Board;
-	}(_react.Component)) || _class);
+	}(_react.Component)) || _class) || _class);
 	exports.default = Board;
 
 /***/ },
@@ -49368,6 +49398,25 @@
 	var ADD_CARD = exports.ADD_CARD = 'ADD_CARD';
 	var LOAD_BOARD = exports.LOAD_BOARD = 'LOAD_BOARD';
 	var SET_FILTER = exports.SET_FILTER = 'SET_FILTER';
+	var UPDATE_CARD = exports.UPDATE_CARD = 'UPDATE_CARD';
+	var DELETE_CARD = exports.DELETE_CARD = 'DELETE_CARD';
+
+	var updateCard = exports.updateCard = function updateCard(card) {
+	  var action = null;
+	  if (card.card.delete != null) {
+	    console.log('delete');
+	    action = {
+	      type: DELETE_CARD,
+	      card: card
+	    };
+	  } else {
+	    action = {
+	      type: UPDATE_CARD,
+	      card: card
+	    };
+	  };
+	  return action;
+	};
 
 	var nextCardId = 0;
 	var addCard = exports.addCard = function addCard(title, description) {
@@ -49529,7 +49578,8 @@
 	var mapStateToProps = function mapStateToProps(state) {
 	  return {
 	    lists: state.lists,
-	    filters: state.filters
+	    filters: state.filters,
+	    cards: state.cards
 	  };
 	};
 
@@ -49548,6 +49598,7 @@
 	      var _props = this.props;
 	      var lists = _props.lists;
 	      var filters = _props.filters;
+	      var cards = _props.cards;
 
 	      var rowStyles = {
 	        overflowX: 'scroll',
@@ -49903,11 +49954,21 @@
 	            data.doctype = "Communication";
 	            data.reference_doctype = card.props.doc.doctype;
 	            data.reference_name = card.props.doc.name;
-	            card.props.doc.contact_date = data.next_contact_date;
 	            frappe.call({
 	              method: "frappe.client.insert",
 	              args: {
 	                "doc": data
+	              },
+	              callback: function callback(r) {
+	                frappe.call({
+	                  method: "frappe.client.set_value",
+	                  args: {
+	                    "doctype": card.props.doc.doctype,
+	                    "name": card.props.doc.name,
+	                    "fieldname": "contact_date",
+	                    "value": data.next_contact_date
+	                  }
+	                });
 	              }
 	            });
 	          });
@@ -49933,9 +49994,11 @@
 	      var url = this.props.url;
 	      var cardID = ".modal-body[id*='" + String(url) + "']";
 	      var info = this.getInfo();
-	      var comm = this.getComms();
 	      $(".modal-content").find(cardID).append(info);
-	      $(".modal-content").find(cardID).append(comm);
+	      if (this.props.doc.communications != null) {
+	        var comm = this.getComms();
+	        $(".modal-content").find(cardID).append(comm);
+	      }
 	    }
 	    // moved html to here from getInfo to make it easier to change styling
 
@@ -50017,10 +50080,10 @@
 	    }
 	  }]);
 
-	  function Card(props) {
+	  function Card(props, context) {
 	    _classCallCheck(this, Card);
 
-	    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Card).call(this, props));
+	    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Card).call(this, props, context));
 
 	    _this.open = _this.open.bind(_this);
 	    _this.close = _this.close.bind(_this);
@@ -50045,6 +50108,7 @@
 	      var doc = _props.doc;
 	      var url = _props.url;
 	      var display = _props.display;
+	      var key = _props.key;
 	      var _props2 = this.props;
 	      var connectDragSource = _props2.connectDragSource;
 	      var isDragging = _props2.isDragging;
@@ -50053,7 +50117,7 @@
 
 	      return _react2.default.createElement(
 	        'div',
-	        { className: 'kanban-card' },
+	        { className: 'kanban-card', id: key },
 	        _react2.default.createElement(
 	          _reactBootstrap.Panel,
 	          { bsStyle: this.getStyle(doc, display),
@@ -50121,6 +50185,7 @@
 
 	  return Card;
 	}(_react.Component), _class2.propTypes = {
+	  key: _react.PropTypes.string,
 	  doc: _react.PropTypes.object,
 	  display: _react.PropTypes.object,
 	  connectDragSource: _react.PropTypes.func.isRequired,
@@ -71505,8 +71570,30 @@
 	  var action = arguments[1];
 
 	  switch (action.type) {
+	    case ActionTypes.UPDATE_CARD:
+	      var newCard = action.card.card;
+	      var existing_card = state.find(function (existing) {
+	        return existing.key == newCard.key;
+	      });
+	      if (existing_card == null) {
+	        var newState = [].concat(_toConsumableArray(state), [newCard]);
+	      } else {
+	        var idx = state.indexOf(existing_card);
+	        var newState = [].concat(_toConsumableArray(state.slice(0, idx)), [newCard], _toConsumableArray(state.slice(idx + 1)));
+	      }
+	      return newState;
 	    case ActionTypes.ADD_CARD:
 	      return [].concat(_toConsumableArray(state), [card(undefined, action)]);
+	    case ActionTypes.DELETE_CARD:
+	      var delCard = action.card.card;
+	      var existing_card = state.find(function (existing) {
+	        return existing.key == delCard.key;
+	      });
+	      if (existing_card != null) {
+	        var idx = state.indexOf(existing_card);
+	        var newState = [].concat(_toConsumableArray(state.slice(0, idx)), _toConsumableArray(state.slice(idx + 1)));
+	      }
+	      return newState;
 	    default:
 	      return state;
 	  }
