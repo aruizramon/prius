@@ -8,7 +8,8 @@ import Filter from '../components/Filter';
 const mapStateToProps = (state) => {
   return {
     lists: state.lists,
-    filters: state.filters
+    filters: state.filters,
+    cards: state.cards
   };
 };
 
@@ -16,7 +17,7 @@ const mapStateToProps = (state) => {
 @connect(mapStateToProps)
 export default class Lists extends Component {
   render() {
-    const { lists, filters } = this.props;
+    const { lists, filters, cards } = this.props;
     const rowStyles = {
       overflowX: 'scroll',
       overflowY: 'hidden',

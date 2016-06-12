@@ -35,11 +35,33 @@ const card = (state, action) => {
 
 const cards = (state = [], action) => {
   switch (action.type) {
+    case ActionTypes.UPDATE_CARD:
+      var newCard = action.card.card;
+      var existing_card = state.find(function(existing) {
+        return existing.key == newCard.key;
+      });
+      if (existing_card == null) {
+        var newState = [...state, newCard]
+      } else {
+        var idx = state.indexOf(existing_card);
+        var newState = [...state.slice(0, idx), newCard, ...state.slice(idx + 1)]
+      }
+      return newState;
     case ActionTypes.ADD_CARD:
       return [
         ...state,
         card(undefined, action),
       ];
+    case ActionTypes.DELETE_CARD:
+      var delCard = action.card.card;
+      var existing_card = state.find(function(existing) {
+        return existing.key == delCard.key;
+      });
+      if (existing_card != null) {
+        var idx = state.indexOf(existing_card);
+        var newState = [...state.slice(0, idx), ...state.slice(idx + 1)]
+      }
+      return newState;
     default:
       return state;
   }
