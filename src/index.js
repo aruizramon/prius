@@ -15,3 +15,11 @@ window.updateCard = function(card) {
     RenderedApp.updateCard({ card });
   }
 };
+
+window.loadCards = function(cards) {
+  if (RenderedApp != null){
+    cards.forEach(function(card){
+      RenderedApp.updateCards({ card })
+    });
+  }
+};

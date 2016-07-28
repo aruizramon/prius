@@ -75,6 +75,14 @@
 	  }
 	};
 
+	window.loadCards = function (cards) {
+	  if (RenderedApp != null) {
+	    cards.forEach(function (card) {
+	      RenderedApp.updateCards({ card: card });
+	    });
+	  }
+	};
+
 /***/ },
 /* 2 */
 /***/ function(module, exports, __webpack_require__) {
@@ -49404,7 +49412,6 @@
 	var updateCard = exports.updateCard = function updateCard(card) {
 	  var action = null;
 	  if (card.card.delete != null) {
-	    console.log('delete');
 	    action = {
 	      type: DELETE_CARD,
 	      card: card

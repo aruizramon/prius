@@ -9,7 +9,6 @@ export const DELETE_CARD = 'DELETE_CARD';
 export const updateCard = (card) => {
   var action = null;
   if (card.card.delete != null) {
-    console.log('delete');
     action = {
       type: DELETE_CARD,
       card: card,

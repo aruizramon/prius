@@ -14,7 +14,7 @@ const cardSource = {
   },
 };
 
-
+// For connecting columns / dragging
 @DragSource(ItemTypes.CARD, cardSource, (connect, monitor) => ({
   showModal: false,
   connectDragSource: connect.dragSource(),
@@ -38,141 +38,11 @@ class Card extends Component {
   open() {
     this.setState({ showModal: true });
   }
-  //// log_call()
-  // calls frappe.prompt to log a call for the given lead
-  log_call() {
-      this.setState({ showModal: false });
-      var card = this
-      var lead_prompt_info = [
-        {label: "Contact", fieldtype: "Data", default:this.props.doc.lead_name, read_only: "1"},
-        {fieldtype: "Column Break"},
-        {label: "Phone", fieldname: "phone_no", fieldtype: "Data", default: this.props.doc.phone, read_only: "1"},
-        {fieldtype: "Section Break"},
-        {label: "Sent or Received", fieldname: "sent_or_received",
-        fieldtype: "Select", options: ["Sent", "Received"], default: "Sent"},
-        {fieldtype: "Column Break"},
-        {label: "Next Contact Date", fieldtype: "Date", reqd: "1"},
-        {fieldtype: "Section Break"},
-        {label: "Subject", fieldtype: "Data", default: "Call " + (new Date())},
-        {fieldtype: "Section Break"},
-        {label: "Notes", fieldname: "content", fieldtype: "Small Text", reqd:"1"}
-      ]
-      frappe.call({
-        method: "frappe.client.get_list",
-        args: {
-          "doctype": "Communication",
-          "fields": ["Subject", "Content", "Communication_Date", "Communication_Type"],
-          "filters": {
-            "reference_doctype": card.props.doc.doctype,
-            "reference_name": card.props.doc.name,
-            "communication_type": ["in", ["Comment", "Communication"]]
-          }
-        },
-        callback: function(r) {
-          lead_prompt_info.push({fieldtype: "Section Break"})
-          var newMessage = "new"
-          if(r.message != undefined) {
-            r.message.forEach(function(foo) {
-              var content = ""
-              if(foo.Communication_Type == "Comment") {
-                if(foo.Content != null && foo.Subject != null && foo.Content < foo.Subject) {
-                  content = foo.Subject + '\n' + foo.Content
-                } else if(foo.Content != null) {
-                  content = foo.Content
-                } else if (foo.Subject != null) {
-                  content = foo.Subject
-                }
-                newMessage = {label: "<i class='octicon octicon-comment-discussion icon-fixed-width'></i> Comment - " + foo.Communication_Date, fieldname: "message",
-                              fieldtype: "Small Text", default: content, read_only: "1"}
-              } else if (foo.Communication_Type == "Communication") {
-                content = foo.Subject + '\n' + foo.Content
-                newMessage = {label: "<i class='octicon octicon-device-mobile icon-fixed-width'></i> Communication", fieldname: "message",
-                              fieldtype: "Small Text", default: content, read_only: "1"}
-              }
-              var state = true
-              lead_prompt_info.forEach(function(bar) {
-                if(JSON.stringify(bar) == JSON.stringify(newMessage)) {
-                  state = false
-                }
-              })
-              if(state) {
-                lead_prompt_info.push(newMessage)
-                lead_prompt_info.push({fieldtype: "Section Break"})
-              }
-            })
-          }
-          var communication = frappe.prompt(lead_prompt_info,
-            function(data){
-              data.doctype = "Communication";
-              data.reference_doctype = card.props.doc.doctype;
-              data.reference_name = card.props.doc.name;
-              frappe.call({
-                method: "frappe.client.insert",
-                args: {
-                  "doc": data
-                },
-                callback: function(r) {
-                  frappe.call({
-                    method: "frappe.client.set_value",
-                    args: {
-                      "doctype": card.props.doc.doctype,
-                      "name": card.props.doc.name,
-                      "fieldname": "contact_date",
-                      "value": data.next_contact_date
-                    }
-                  })
-                }
-              })
-            })
-          }
-        });
-  }
   closeApp() {
     this.setState({ showModal: false});
     window.location.reload();
   }
-  // unused
-  getForm(form) {
-    return { __html: form.form}
-  }
-  //// addValue()
-  // adds the field info and the communication history to a card onEnter event
-  addValue() {
-    var url = this.props.url;
-    var cardID = ".modal-body[id*='" + String(url) + "']";
-    var info = this.getInfo();
-    $(".modal-content").find(cardID).append(info);
-    if (this.props.doc.communications != null){
-      var comm = this.getComms();
-      $(".modal-content").find(cardID).append(comm);
-    }
-  }
-  //// makeField()
-  // returns a html formatted form-group with the given label and field
-  makeField(field, label) {
-    if (field == null) {
-      var field_html = ('<div class="form-group has-error" style="padding-left:15px;"><label class="control-label">'
-        + label
-        + '</label><br />'
-        + "<strong>No Information</strong>"
-        + '</div><br />')
-    } else if (this.getStyle(this.props.doc, this.props.display) == "pastDueCall" && label == "Next Contact Date") {
-      var field_html = ('<div class="form-group has-error" style="padding-left:15px;"><label class="control-label">'
-        + label
-        + '</label><br />'
-        + "<strong>" + field + "</strong>"
-        + '</div><br />')
-    } else {
-        var field_html = ('<div class="form-group" style="padding-left:15px;"><label class="control-label">'
-          + label
-          + '</label><br />'
-          + field
-          + '</div><br />')
-    }
-    return field_html
-  }
-  //// getInfo()
-  // returns the html formatted lead info
+  // returns the html formatted info
   getInfo() {
     var subtitleOne = this.makeField(this.formatField(
         this.props.display.subOneType, this.props.display.subOne),
@@ -225,8 +95,7 @@ class Card extends Component {
     }
     return form
   }
-  //// getComms()
-  // returns the html formatted lead communication history
+  // returns the html formatted communication history
   getComms() {
     var comm = "<div class='panel panel-default' style='margin:-15px;'>"
       + "<div class='panel-heading' data-toggle='collapse' href='#collapse1'>"
@@ -265,7 +134,6 @@ class Card extends Component {
     comm = comm + "</div></div>"
     return comm
   }
-  //// formatField(fieldtype, field)
   // formats and returns given field based on type
   formatField(fieldtype, field) {
     if (fieldtype == 'Currency') {
@@ -281,7 +149,6 @@ class Card extends Component {
     }
     return field
   }
-  //// checkStale(doc, display)
   // returns false if
   // - last communication is < 30 days ago
   // - next contact date is < 30 days ago
@@ -299,17 +166,16 @@ class Card extends Component {
     }
     return state
   }
-  //// checkCommunications(doc, display)
   // checks the dates of the communication history
   // returns true if stale and false if within 30 days
   checkCommunications(doc, display) {
-    var state = true;
-    var staleDate = moment(moment().format("YYYY-MM-DD"), "YYYY-MM-DD").subtract(30, 'days');
+    let state = true;
+    const staleDate = moment(moment().format("YYYY-MM-DD"), "YYYY-MM-DD").subtract(30, 'days');
     for (var i = 0; i < doc.communications.length; i++) {
-      var type1 = doc.communications[i]["communication_type"];
-      var type2 = doc.communications[i]["comment_type"];
+      const type1 = doc.communications[i]["communication_type"];
+      const type2 = doc.communications[i]["comment_type"];
       if (type1 == "Communication" || type2 != "Updated") {
-        var newDate = moment(doc.communications[i]["communication_date"], "YYYY-MM-DD");
+        const newDate = moment(doc.communications[i]["communication_date"], "YYYY-MM-DD");
         if (staleDate.isBefore(newDate)) {
           state = false;
         }
@@ -317,36 +183,34 @@ class Card extends Component {
     }
     return state
   }
-  //// getStyle(doc, display)
   // validates and returns the state of the lead
   getStyle(doc, display) {
+    const now = moment(moment().format('YYYY-MM-DD'), 'YYYY-MM-DD');
+    const contact = moment(doc.contact_date, 'YYYY-MM-DD');
+    const nextWeek = moment(moment().format('YYYY-MM-DD'), 'YYYY-MM-DD').add(7, 'days');
+    const staleDate = this.checkStale(doc, display);
+    // if a card has a nextContactBy within the next week
+    if (now.isSameOrBefore(contact) && contact.isSameOrBefore(nextWeek)) {
+      return 'imminentContact'
+    } else if (now.isAfter(contact)) {
+      return 'pastDueCall'
+    }
     // if a card field is null, danger
     for (var prop in display) {
       if (display.hasOwnProperty(prop)) {
         if (display[prop] == null) {
-          return "missingData"
+          return 'missingData'
         }
       }
     }
-    var now = moment(moment().format("YYYY-MM-DD"), "YYYY-MM-DD");
-    var contact = moment(doc.contact_date, "YYYY-MM-DD");
-    var nextWeek = moment(moment().format("YYYY-MM-DD"), "YYYY-MM-DD").add(7, 'days');
-    var staleDate = this.checkStale(doc, display);
+
     // if a card has a nextContactBy or last communication
     // date > 30 days less than the current
     if (staleDate) {
-      return "stale"
-    }
-    // if a card has a nextContactBy within the next week
-    else if (now.isSameOrBefore(contact) && contact.isSameOrBefore(nextWeek)) {
-      return "imminentContact"
-    }
-    // if a card has a nextContactBy already passed due but is not stale
-    else if (now.isAfter(contact)){
-      return "pastDueCall"
+      return 'stale'
     }
     // all info is correct and no dates are due/past
-    return "statusOK"
+    return 'statusOK'
   }
   constructor(props, context) {
     super(props, context);
@@ -370,7 +234,8 @@ class Card extends Component {
 
   render() {
     const { doc, url, display, key } = this.props;
-    const { connectDragSource, isDragging } = this.props;
+// to track dragging, etc.
+// const { connectDragSource, isDragging } = this.props;
     const { showModal } = this.state;
 
     return (
@@ -385,16 +250,25 @@ class Card extends Component {
           </small>
         </Panel>
 
-        <Modal bsStyle={this.getStyle(doc, display)} show={this.state.showModal} onEnter={this.addValue} onHide={this.close}>
+        <Modal
+          bsStyle={this.getStyle(doc, display)}
+          show={this.state.showModal}
+          onEnter={this.addValue}
+          onHide={this.close}
+        >
           <Modal.Header>
             <Modal.Title>
               <Row>
                 <Col sm={9} md={9} lg={9}>
-                    <a href={url} target={url}>{this.formatField(display.titleFieldType, display.titleField)}</a>
+                    <a
+                      href={url}
+                      target={url}
+                    >
+                      {this.formatField(display.titleFieldType, display.titleField)}
+                    </a>
                 </Col>
                 <Col sm={3} md={3} lg={3}>
                   <ButtonToolbar bsClass="btn-toolbar pull-right">
-                    <Button bsSize="xsmall" bsStyle="primary" onClick={this.log_call}>Log Call</Button>
                     <Button bsSize="xsmall" onClick={this.close}>&times;</Button>
                   </ButtonToolbar>
                 </Col>

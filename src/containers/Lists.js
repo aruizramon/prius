@@ -28,7 +28,6 @@ export default class Lists extends Component {
       display:'inline-block',
       whiteSpace: 'normal',
       verticalAlign: 'top',
-      //width: '300px',
     };
     return (
       <div>
