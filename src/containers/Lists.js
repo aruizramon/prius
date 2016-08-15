@@ -5,13 +5,11 @@ import List from '../components/List';
 import Filter from '../components/Filter';
 
 
-const mapStateToProps = (state) => {
-  return {
-    lists: state.lists,
-    filters: state.filters,
-    cards: state.cards
-  };
-};
+const mapStateToProps = (state) => ({
+  lists: state.lists,
+  filters: state.filters,
+  cards: state.cards,
+});
 
 
 @connect(mapStateToProps)
@@ -25,7 +23,7 @@ export default class Lists extends Component {
     };
     const columnStyles = {
       float: 'none',
-      display:'inline-block',
+      display: 'inline-block',
       whiteSpace: 'normal',
       verticalAlign: 'top',
     };

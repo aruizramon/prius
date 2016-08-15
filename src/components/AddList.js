@@ -5,9 +5,9 @@ import { connect } from 'react-redux';
 import { addList } from '../actions';
 
 
-const mapDispatchToProps = (dispatch) => {
-  return bindActionCreators({ addList }, dispatch);
-};
+const mapDispatchToProps = (dispatch) =>
+  bindActionCreators({ addList }, dispatch);
+
 
 @connect(null, mapDispatchToProps)
 export default class AddCard extends Component {

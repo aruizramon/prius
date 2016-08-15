@@ -6,54 +6,47 @@ export const UPDATE_CARD = 'UPDATE_CARD';
 export const DELETE_CARD = 'DELETE_CARD';
 
 
+// TODO Don't love this. delete card rarely used w/ current architecture
 export const updateCard = (card) => {
-  var action = null;
+  let action = null;
   if (card.card.delete != null) {
     action = {
       type: DELETE_CARD,
-      card: card,
+      card,
     };
   } else {
     action = {
-     type: UPDATE_CARD,
-     card: card,
-   };
-  };
+      type: UPDATE_CARD,
+      card,
+    };
+  }
   return action;
 };
 
 
 let nextCardId = 0;
-export const addCard = (title, description, parentList = 0) => {
-  return {
-    type: ADD_CARD,
-    id: nextCardId++,
-    title,
-    description,
-    parentList,
-  };
-};
+export const addCard = (title, description, parentList = 0) => ({
+  type: ADD_CARD,
+  id: nextCardId++,
+  title,
+  description,
+  parentList,
+});
 
 let nextListId = 0;
-export const addList = (title) => {
-  return {
-    type: ADD_LIST,
-    id: nextListId++,
-    title,
-  };
-};
+export const addList = (title) => ({
+  type: ADD_LIST,
+  id: nextListId++,
+  title,
+});
 
-export const loadBoard = (data) => {
-  return {
-    type: 'LOAD_BOARD',
-    data: data,
-  };
-};
+export const loadBoard = (data) => ({
+  type: 'LOAD_BOARD',
+  data,
+});
 
-export const setFilter = (field, values) => {
-  return {
-    type: SET_FILTER,
-    id: field,
-    values,
-  };
-};
+export const setFilter = (field, values) => ({
+  type: SET_FILTER,
+  id: field,
+  values,
+});

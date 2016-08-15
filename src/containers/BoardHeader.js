@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Row, Col, PageHeader, Select } from 'react-bootstrap';
+import { Row, Col, PageHeader } from 'react-bootstrap';
 
 
 export default class Board extends Component {

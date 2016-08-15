@@ -8,11 +8,11 @@ import { updateCard } from '../actions';
 
 export class App extends Component {
   constructor(props) {
-    super(props)
+    super(props);
     this.updateCard = this.updateCard.bind(this);
   }
   updateCard(card) {
-    this.refs['board'].store.dispatch(updateCard(card))
+    this.refs.board.store.dispatch(updateCard(card));
   }
   render() {
     const { initialState } = this.props;
@@ -21,7 +21,7 @@ export class App extends Component {
       <Provider store={cardStore}>
         <div>
           <Board ref="board" />
-          {/*<DevTools />*/}
+          { /*<DevTools />*/ }
         </div>
       </Provider>
     );

@@ -42,99 +42,6 @@ class Card extends Component {
     this.setState({ showModal: false});
     window.location.reload();
   }
-  // returns the html formatted info
-  getInfo() {
-    var subtitleOne = this.makeField(this.formatField(
-        this.props.display.subOneType, this.props.display.subOne),
-        this.props.display.subOneLabel)
-    var subtitleTwo = this.makeField(this.formatField(
-        this.props.display.subTwoType, this.props.display.subTwo),
-        this.props.display.subTwoLabel)
-    var fieldOne = this.makeField(this.formatField(
-        this.props.display.fieldOneType, this.props.display.fieldOne),
-        this.props.display.fieldOneLabel)
-    var fieldTwo = this.makeField(this.formatField(
-        this.props.display.fieldTwoType, this.props.display.fieldTwo),
-        this.props.display.fieldTwoLabel)
-    var fieldThree = this.makeField(this.formatField(
-        this.props.display.fieldThreeType, this.props.display.fieldThree),
-        this.props.display.fieldThreeLabel)
-    var fieldFour = this.makeField(this.formatField(
-        this.props.display.fieldFourType, this.props.display.fieldFour),
-        this.props.display.fieldFourLabel)
-    var col1 = '<div class="col-sm-6"><p>'
-      + subtitleOne + fieldOne + fieldTwo
-      + '</p></div>'
-    var col2 = '<div class="col-sm-6"><p>'
-      + subtitleTwo + fieldThree + fieldFour
-      + '</p></div>'
-    return('<div class="row">' + col1 + col2 + '</div><br />')
-  }
-  //// commMakeFOrm(label, value)
-  // returns an html formatted communication for the history
-  commMakeForm(label, value) {
-    var form = ''
-    var oticon = {}
-    oticon["Comment"] = "<i class='octicon octicon-comment-discussion icon-fixed-width'></i> ";
-    oticon["Communication"] = "<i class='octicon octicon-device-mobile icon-fixed-width'></i> ";
-    oticon["Status Update"] = "<i class='octicon octicon-pencil icon-fixed-width'></i> ";
-    if (label == "Comment" || label == "Communication" || label == "Status Update") {
-      form = "<p style='max-width:600px; background-color:#ebeff2; margin-bottom:0px;"
-                + " padding-left:15px; padding-top:7px; padding-bottom:7px;'>"
-                + "<span>" + oticon[label] + label + ": " + value + "</span></p>"
-    } else if (label == "Col") {
-      form = '<div class="col-sm-6"><p>'
-                + value
-                + '</p></div>'
-    } else {
-      form = '<div class="form-group"><label class="control-label">'
-                + label
-                + '</label><br />'
-                + value
-                + '</div>'
-    }
-    return form
-  }
-  // returns the html formatted communication history
-  getComms() {
-    var comm = "<div class='panel panel-default' style='margin:-15px;'>"
-      + "<div class='panel-heading' data-toggle='collapse' href='#collapse1'>"
-      + "Communication History"
-      + "<i class='octicon octicon-chevron-down icon-fixed-width' style='float:right;'></i>"
-      + "</div><div id='collapse1' class='panel-collapse collapse'>"
-    for (var i = 0; i < this.props.doc.communications.length; i++) {
-      var type = this.props.doc.communications[i]["communication_type"]
-      var date = this.formatField('Date', this.props.doc.communications[i]["communication_date"])
-      if (type == "Comment") {
-        if (this.props.doc.communications[i]["comment_type"] == "Updated") {
-          type = "Status Update"
-        }
-      }
-      var commType = this.commMakeForm(type, date)
-      var subject = this.commMakeForm('Subject', String(this.props.doc.communications[i]["subject"]))
-      var user = this.commMakeForm('User', String(this.props.doc.communications[i]["user"]))
-      var content = ''
-      // if content is empty, dont render field
-      if (this.props.doc.communications[i]["content"] != null) {
-        content = this.commMakeForm('Content', String(this.props.doc.communications[i]["content"]))
-      }
-
-      var col1 = this.commMakeForm('Col', subject)
-      var col2 = this.commMakeForm('Col', user)
-      var row1 = '<div class="row" style="margin-top:5px; margin-left:3px; margin-right:17px; border-right:2px; border-color:#ebeff2;">'
-                  + col1 + col2 + '</div>'
-      var row2 = '<div class="row" style="margin-top:-15px; margin-left:3px; margin-right:17px; border-right:2px; border-color:#ebeff2;">'
-                  + '<div class="col-sm-12"><p>' + content + '</p></div></div>'
-      var newComm = "<div class='row'>"
-                     + "<div class='col-sm-12'><p>"
-                     + commType + "<div style='margin-left:14px; margin-top:0px; border-style: solid; border-width: 0px 0px 0px 3px; border-color:#ebeff2;'>"
-                     + row1 + row2 +"</div></p></div></div>"
-      comm = comm + newComm
-    }
-    comm = comm + "</div></div>"
-    return comm
-  }
-  // formats and returns given field based on type
   formatField(fieldtype, field) {
     if (fieldtype == 'Currency') {
       field = numeral(field).format('$0,0')
@@ -154,9 +61,9 @@ class Card extends Component {
   // - next contact date is < 30 days ago
   // otherwise the lead is stale and returns true
   checkStale(doc, display) {
-    var now = moment(moment().format("YYYY-MM-DD"), "YYYY-MM-DD")
-    var contactDate = moment(doc.contact_date, "YYYY-MM-DD");
-    var staleDate = moment(moment().format("YYYY-MM-DD"), "YYYY-MM-DD").subtract(30, 'days');
+    var now = moment(moment().format('YYYY-MM-DD'), 'YYYY-MM-DD')
+    var contactDate = moment(doc.contact_date, 'YYYY-MM-DD');
+    var staleDate = moment(moment().format('YYYY-MM-DD'), 'YYYY-MM-DD').subtract(30, 'days');
     var state = true;
 
     if (staleDate.isBefore(contactDate)) {
@@ -169,19 +76,18 @@ class Card extends Component {
   // checks the dates of the communication history
   // returns true if stale and false if within 30 days
   checkCommunications(doc, display) {
-    let state = true;
-    const staleDate = moment(moment().format("YYYY-MM-DD"), "YYYY-MM-DD").subtract(30, 'days');
-    for (var i = 0; i < doc.communications.length; i++) {
-      const type1 = doc.communications[i]["communication_type"];
-      const type2 = doc.communications[i]["comment_type"];
-      if (type1 == "Communication" || type2 != "Updated") {
-        const newDate = moment(doc.communications[i]["communication_date"], "YYYY-MM-DD");
+    const staleDate = moment(moment().format('YYYY-MM-DD'), 'YYYY-MM-DD').subtract(30, 'days');
+    doc.communications.forEach((communication) => {
+      const type1 = communication.communication_type;
+      const type2 = communication.comment_type;
+      if (type1 == 'Communication' || type2 != 'Updated') {
+        const newDate = moment(communication.communication_date, 'YYYY-MM-DD');
         if (staleDate.isBefore(newDate)) {
-          state = false;
+          return false;
         }
       }
-    }
-    return state
+    });
+    return true;
   }
   // validates and returns the state of the lead
   getStyle(doc, display) {
@@ -217,18 +123,12 @@ class Card extends Component {
     this.open = this.open.bind(this);
     this.close = this.close.bind(this);
     this.closeApp = this.closeApp.bind(this);
-    this.getForm = this.getForm.bind(this);
     this.formatField = this.formatField.bind(this);
     this.getStyle = this.getStyle.bind(this);
     this.checkStale = this.checkStale.bind(this);
     this.state = {
       showModal: false,
     }
-    this.log_call = this.log_call.bind(this);
-    this.addValue = this.addValue.bind(this);
-    this.getInfo = this.getInfo.bind(this);
-    this.getComms = this.getComms.bind(this);
-    this.commMakeForm = this.commMakeForm.bind(this);
     this.checkCommunications = this.checkCommunications.bind(this);
   }
 
@@ -239,14 +139,14 @@ class Card extends Component {
     const { showModal } = this.state;
 
     return (
-      <div className="kanban-card" id={key}>
+      <div className='kanban-card' id={key}>
         <Panel bsStyle={this.getStyle(doc, display)}
                header={display.titleField}
                onClick={this.open}>
           <small>
-            {display.subOneLabel} - {this.formatField(display.subOneType, display.subOne)}
+            {display.subOneLabel} - {formatField(display.subOneType, display.subOne)}
             <br />
-            {display.subTwoLabel} - {this.formatField(display.subTwoType, display.subTwo)}
+            {display.subTwoLabel} - {formatField(display.subTwoType, display.subTwo)}
           </small>
         </Panel>
 
@@ -264,18 +164,23 @@ class Card extends Component {
                       href={url}
                       target={url}
                     >
-                      {this.formatField(display.titleFieldType, display.titleField)}
+                      {formatField(display.titleFieldType, display.titleField)}
                     </a>
                 </Col>
                 <Col sm={3} md={3} lg={3}>
-                  <ButtonToolbar bsClass="btn-toolbar pull-right">
-                    <Button bsSize="xsmall" onClick={this.close}>&times;</Button>
+                  <ButtonToolbar bsClass='btn-toolbar pull-right'>
+                    <Button bsSize='xsmall' onClick={this.close}>&times;</Button>
                   </ButtonToolbar>
                 </Col>
               </Row>
             </Modal.Title>
           </Modal.Header>
-          <Modal.Body id={url}>
+          <Modal.Body>
+            <Col>
+              {getInfo(this.props.display)}
+              <br />
+              {getComms(this.props)}
+            </Col>
           </Modal.Body>
         </Modal>
       </div>
@@ -284,3 +189,174 @@ class Card extends Component {
 }
 
 export default Card;
+
+
+const makeField = (field, label) => {
+  if (field == null) {
+    return (
+      <div className='form-group has-error' style={{ paddingLeft: 15 }}>
+        <label className='control-label'>
+          {label}
+        </label>
+        <br />
+        <strong>No Information</strong>
+      </div>
+    );
+  // } else if (getStyle(props.doc, props.display) == 'pastDueCall' && label == 'Next Contact Date') {
+  //   var field_html = ('<div class='form-group has-error' style='padding-left:15px;'><label class='control-label'>'
+  //     + label
+  //     + '</label><br />'
+  //     + '<strong>' + field + '</strong>'
+  //     + '</div><br />')
+  } else {
+    return (
+      <div className='form-group' style={{ paddingLeft: 15 }}>
+        <label className='control-label'>
+          {label}
+        </label>
+      <br />
+      {field}
+      </div>
+    );
+  }
+};
+
+// returns the html formatted info
+const getInfo = (display) => {
+  const subtitleOne = makeField(
+    formatField(display.subOneType, display.subOne), display.subOneLabel);
+  const subtitleTwo = makeField(
+    formatField(display.subTwoType, display.subTwo), display.subTwoLabel);
+  const fieldOne = makeField(
+    formatField(display.fieldOneType, display.fieldOne), display.fieldOneLabel);
+  const fieldTwo = makeField(
+    formatField(display.fieldTwoType, display.fieldTwo), display.fieldTwoLabel);
+  const fieldThree = makeField(
+    formatField(display.fieldThreeType, display.fieldThree), display.fieldThreeLabel);
+  const fieldFour = makeField(
+    formatField(display.fieldFourType, display.fieldFour), display.fieldFourLabel);
+  return (
+    <Row>
+      <Col sm={6} md={6}>
+        <p>{subtitleOne}{fieldOne}{fieldTwo}</p>
+      </Col>
+      <Col sm={6} md={6}>
+        <p>{subtitleTwo}{fieldThree}{fieldFour}</p>
+      </Col>
+    </Row>
+  );
+};
+
+
+const commMakeForm = (label, value) => {
+  const oticon = {
+    comment: <i className='octicon octicon-comment-discussion icon-fixed-width' />,
+    communication: <i className='octicon octicon-device-mobile icon-fixed-width' />,
+    'Status Update': <i className='octicon octicon-pencil icon-fixed-width' />,
+  };
+  if (label === 'Comment' || label === 'Communication' || label === 'Status Update') {
+    return (
+      <p
+        style={{ maxWidth: 600, backgroundColor: '#ebeff2', marginBottom: 0,
+                 paddingLeft: 15, paddingTop: 7, paddingBottom: 7 }}
+      >
+        <span>{oticon[label]}{label}: {value}</span>
+      </p>
+    );
+  } else if (label == 'Col') {
+    return (
+      <div className='col-sm-6'>
+        <p>{value}</p>
+      </div>
+    );
+  } else if (label === 'Content'){
+    return (
+      <div className='form-group'>
+        <label className='control-label'>{label}</label>
+        <br />
+        <p>{value}</p>
+      </div>
+    );
+  }
+};
+
+// returns the html formatted communication history
+const getComms = (props) =>
+  <div className='panel panel-default' style={{ margin: -15 }}>
+    <div className='panel-heading' data-toggle='collapse' href='#collapse1'>
+      Communication History
+      <i
+        className='octicon octicon-chevron-down icon-fixed-width'
+        style={{ float: 'right' }}
+      >
+      </i>
+    </div>
+    <div id='collapse1' className='panel-collapse collapse'>
+      {props.doc.communications.map((communication) => {
+        let type = communication.communication_type
+        const date = formatField('Date', communication.communication_date);
+        if (type == 'Comment' && communication.comment_type == 'Updated') {
+          type = 'Status Update'
+        }
+        var commType = commMakeForm(type, date)
+        var subject = commMakeForm('Subject', String(communication.subject));
+        var user = commMakeForm('User', String(communication.user));
+        var content = ''
+        // if content is empty, dont render field
+        if (communication.content != null) {
+          content = commMakeForm('Content', String(communication.content));
+        }
+        return (
+          <Row style={{ marginLeft: 0, marginRight: 0, marginTop: 0,
+                        borderWidth: '0 0 0 3', borderColor: '#ebeff2' }}
+          >
+            <p>{commType}</p>
+              {communication.content == null ?
+                null
+              : <div>
+                  <Row
+                    style={{ marginTop: 5, marginLeft: 3, marginRight: 17,
+                             borderRight: 2, borderColor: '#ebeff2' }}
+                  >
+                    <Col sm={6} md={6} lg={6}>
+                      <div className='form-group'>
+                        <label className='control-label'>Subject</label>
+                        <p>{communication.subject}</p>
+                      </div>
+                    </Col>
+                    <Col sm={6} md={6} lg={6}>
+                      <div className='form-group'>
+                        <label className='control-label'>User</label>
+                        <p>{communication.user}</p>
+                      </div>
+                    </Col>
+                    <Col sm={12} md={12} lg={12}>
+                      <div className='form-group'>
+                        <label className='control-label'>Content</label>
+                        <p>{communication.content}</p>
+                      </div>
+                    </Col>
+                  </Row>
+              </div>}
+          </Row>
+        );
+      })}
+    </div>
+  </div>;
+
+
+
+const formatField = (fieldtype, field) => {
+  if (fieldtype === 'Currency') {
+    return numeral(field).format('$0,0');
+  } else if (fieldtype === 'Int') {
+    return numeral(field).format('0,0');
+  } else if (fieldtype === 'Float') {
+    return numeral(field).format('0,0.00');
+  } else if (fieldtype === 'Date' || fieldtype === 'Datetime') {
+    if (field != null) {
+      return moment(field).format('dddd, MMM Do, YYYY');
+    }
+  }
+  return field;
+};

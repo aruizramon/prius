@@ -5,9 +5,9 @@ import { connect } from 'react-redux';
 import { addCard } from '../actions';
 
 
-const mapDispatchToProps = (dispatch) => {
-  return bindActionCreators({ addCard }, dispatch);
-};
+const mapDispatchToProps = (dispatch) =>
+  bindActionCreators({ addCard }, dispatch);
+
 
 @connect(null, mapDispatchToProps)
 export default class AddCard extends Component {
@@ -24,8 +24,7 @@ export default class AddCard extends Component {
         <form ref="form" onSubmit={onSubmit}>
           <h4>Add Card</h4>
           <Input ref="title" type="text" placeholder="My Card" />
-          <Input ref="description" type="textarea" label="Description"
-                 placeholder="blah blah blah"/>
+          <Input ref="description" type="textarea" label="Description" />
           <ButtonInput type="submit" value="Add to Backlog" bsStyle="primary" />
         </form>
       </Well>
