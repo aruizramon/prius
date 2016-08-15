@@ -1,11 +1,10 @@
 import React, { Component, PropTypes } from 'react';
-import { Panel, Modal, Button, ButtonToolbar} from 'react-bootstrap';
-import { Form, FormGroup, ControlLabel, Row, Col } from 'react-bootstrap';
+import { Panel, Modal, Button, ButtonToolbar, Row, Col } from 'react-bootstrap';
 import ItemTypes from '../constants/ItemTypes';
 import { DragSource } from 'react-dnd';
-import '../style.css'
-var numeral = require('numeral');
-var moment = require('moment');
+import '../style.css';
+const numeral = require('numeral');
+const moment = require('moment');
 
 const cardSource = {
   beginDrag(props) {
@@ -37,10 +36,6 @@ class Card extends Component {
   }
   open() {
     this.setState({ showModal: true });
-  }
-  closeApp() {
-    this.setState({ showModal: false});
-    window.location.reload();
   }
   formatField(fieldtype, field) {
     if (fieldtype == 'Currency') {
@@ -109,7 +104,6 @@ class Card extends Component {
         }
       }
     }
-
     // if a card has a nextContactBy or last communication
     // date > 30 days less than the current
     if (staleDate) {
@@ -122,7 +116,6 @@ class Card extends Component {
     super(props, context);
     this.open = this.open.bind(this);
     this.close = this.close.bind(this);
-    this.closeApp = this.closeApp.bind(this);
     this.formatField = this.formatField.bind(this);
     this.getStyle = this.getStyle.bind(this);
     this.checkStale = this.checkStale.bind(this);
@@ -131,25 +124,22 @@ class Card extends Component {
     }
     this.checkCommunications = this.checkCommunications.bind(this);
   }
-
   render() {
     const { doc, url, display, key } = this.props;
-// to track dragging, etc.
 // const { connectDragSource, isDragging } = this.props;
-    const { showModal } = this.state;
-
     return (
       <div className='kanban-card' id={key}>
-        <Panel bsStyle={this.getStyle(doc, display)}
-               header={display.titleField}
-               onClick={this.open}>
+        <Panel
+          bsStyle={this.getStyle(doc, display)}
+          header={display.titleField}
+          onClick={this.open}
+        >
           <small>
             {display.subOneLabel} - {formatField(display.subOneType, display.subOne)}
             <br />
             {display.subTwoLabel} - {formatField(display.subTwoType, display.subTwo)}
           </small>
         </Panel>
-
         <Modal
           bsStyle={this.getStyle(doc, display)}
           show={this.state.showModal}
@@ -179,7 +169,7 @@ class Card extends Component {
             <Col>
               {getInfo(this.props.display)}
               <br />
-              {getComms(this.props)}
+              {getComms(this.props.doc.communications)}
             </Col>
           </Modal.Body>
         </Modal>
@@ -221,7 +211,6 @@ const makeField = (field, label) => {
   }
 };
 
-// returns the html formatted info
 const getInfo = (display) => {
   const subtitleOne = makeField(
     formatField(display.subOneType, display.subOne), display.subOneLabel);
@@ -238,50 +227,34 @@ const getInfo = (display) => {
   return (
     <Row>
       <Col sm={6} md={6}>
-        <p>{subtitleOne}{fieldOne}{fieldTwo}</p>
+        {subtitleOne}{fieldOne}{fieldTwo}
       </Col>
       <Col sm={6} md={6}>
-        <p>{subtitleTwo}{fieldThree}{fieldFour}</p>
+        {subtitleTwo}{fieldThree}{fieldFour}
       </Col>
     </Row>
   );
 };
 
 
-const commMakeForm = (label, value) => {
-  const oticon = {
-    comment: <i className='octicon octicon-comment-discussion icon-fixed-width' />,
-    communication: <i className='octicon octicon-device-mobile icon-fixed-width' />,
+const makeHeader = (type, value) => {
+  const octicon = {
+    'comment': <i className='octicon octicon-comment-discussion icon-fixed-width' />,
+    'communication': <i className='octicon octicon-device-mobile icon-fixed-width' />,
     'Status Update': <i className='octicon octicon-pencil icon-fixed-width' />,
   };
-  if (label === 'Comment' || label === 'Communication' || label === 'Status Update') {
-    return (
-      <p
-        style={{ maxWidth: 600, backgroundColor: '#ebeff2', marginBottom: 0,
-                 paddingLeft: 15, paddingTop: 7, paddingBottom: 7 }}
-      >
-        <span>{oticon[label]}{label}: {value}</span>
-      </p>
-    );
-  } else if (label == 'Col') {
-    return (
-      <div className='col-sm-6'>
-        <p>{value}</p>
-      </div>
-    );
-  } else if (label === 'Content'){
-    return (
-      <div className='form-group'>
-        <label className='control-label'>{label}</label>
-        <br />
-        <p>{value}</p>
-      </div>
-    );
-  }
+  return (
+    <p
+      style={{ maxWidth: 600, backgroundColor: '#ebeff2', marginBottom: 0,
+               paddingLeft: 15, paddingTop: 7, paddingBottom: 7 }}
+    >
+      <span>{octicon[type]}{type}: {value}</span>
+    </p>
+  );
 };
 
 // returns the html formatted communication history
-const getComms = (props) =>
+const getComms = (communications) =>
   <div className='panel panel-default' style={{ margin: -15 }}>
     <div className='panel-heading' data-toggle='collapse' href='#collapse1'>
       Communication History
@@ -292,52 +265,44 @@ const getComms = (props) =>
       </i>
     </div>
     <div id='collapse1' className='panel-collapse collapse'>
-      {props.doc.communications.map((communication) => {
+      {communications.map((communication) => {
         let type = communication.communication_type
         const date = formatField('Date', communication.communication_date);
         if (type == 'Comment' && communication.comment_type == 'Updated') {
           type = 'Status Update'
         }
-        var commType = commMakeForm(type, date)
-        var subject = commMakeForm('Subject', String(communication.subject));
-        var user = commMakeForm('User', String(communication.user));
-        var content = ''
-        // if content is empty, dont render field
-        if (communication.content != null) {
-          content = commMakeForm('Content', String(communication.content));
-        }
         return (
           <Row style={{ marginLeft: 0, marginRight: 0, marginTop: 0,
                         borderWidth: '0 0 0 3', borderColor: '#ebeff2' }}
           >
-            <p>{commType}</p>
-              {communication.content == null ?
-                null
-              : <div>
-                  <Row
-                    style={{ marginTop: 5, marginLeft: 3, marginRight: 17,
-                             borderRight: 2, borderColor: '#ebeff2' }}
-                  >
-                    <Col sm={6} md={6} lg={6}>
-                      <div className='form-group'>
-                        <label className='control-label'>Subject</label>
-                        <p>{communication.subject}</p>
-                      </div>
-                    </Col>
-                    <Col sm={6} md={6} lg={6}>
-                      <div className='form-group'>
-                        <label className='control-label'>User</label>
-                        <p>{communication.user}</p>
-                      </div>
-                    </Col>
-                    <Col sm={12} md={12} lg={12}>
-                      <div className='form-group'>
-                        <label className='control-label'>Content</label>
-                        <p>{communication.content}</p>
-                      </div>
-                    </Col>
-                  </Row>
-              </div>}
+            {makeHeader(type, date)}
+            {communication.content == null ?
+              null
+            : <div>
+                <Row
+                  style={{ marginTop: 5, marginLeft: 3, marginRight: 17,
+                           borderRight: 2, borderColor: '#ebeff2' }}
+                >
+                  <Col sm={6} md={6} lg={6}>
+                    <div className='form-group'>
+                      <label className='control-label'>Subject</label>
+                      <p>{communication.subject}</p>
+                    </div>
+                  </Col>
+                  <Col sm={6} md={6} lg={6}>
+                    <div className='form-group'>
+                      <label className='control-label'>User</label>
+                      <p>{communication.user}</p>
+                    </div>
+                  </Col>
+                  <Col sm={12} md={12} lg={12}>
+                    <div className='form-group'>
+                      <label className='control-label'>Content</label>
+                      <p>{communication.content}</p>
+                    </div>
+                  </Col>
+                </Row>
+            </div>}
           </Row>
         );
       })}
